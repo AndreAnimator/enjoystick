@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
     status ENUM('paid', 'sent', 'arrived') NOT NULL DEFAULT 'paid',
-    sent_at DATETIME,
-    arrived_at DATETIME,
+    sent_at DATETIME NULL,
+    arrived_at DATETIME NULL,
     UNIQUE KEY uq_oders_user (user_id),
     CONSTRAINT fk_orders_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
