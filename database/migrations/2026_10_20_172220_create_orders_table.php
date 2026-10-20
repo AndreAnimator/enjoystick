@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->deleteOnCascade();
-            $table->foreignId('address_id')->restrictOn;
+            $table->foreignId('address_id')->restrictOnDelete();
             $table->decimal('total', 10, 2);
             $table->enum('status', ['waiting', 'paid', 'sent', 'arrived', 'canceled'])->default('waiting');
             $table->dateTime('sent_at', precision: 0)->nullable();
