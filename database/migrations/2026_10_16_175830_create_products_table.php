@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('category');
             $table->decimal('price', 10, 2);
             $table->string('image')->nullable();
-            $table->int('stock')->default('0');
-            $table->tinyint('active')->default('1');
+            $table->integer('stock')->default('0');
+            $table->tinyInteger('active')->default('1');
             $table->index('category');
             $table->index('active');
             $table->timestamps();

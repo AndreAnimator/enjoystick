@@ -5,9 +5,9 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: bookshelf
-      MYSQL_USER: bookshelf
-      MYSQL_PASSWORD: bookshelf
+      MYSQL_DATABASE: enjoystick
+      MYSQL_USER: enjoystick
+      MYSQL_PASSWORD: enjoystick
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
