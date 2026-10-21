@@ -22,11 +22,16 @@ class Product extends Model
 
     public function carts(): HasMany
     {
-        return $this->hasMany(Cart::class);
+        return $this->hasMany(Cart::class)->withPivot('quantity');
+    }
+
+    public function categories(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class)->withPivot('product_name', 'unit_price', 'quantity');
     }
 }
