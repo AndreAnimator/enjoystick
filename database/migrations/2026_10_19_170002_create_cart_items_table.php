@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cart_id')->cascadeOnDelete();
             $table->foreignId('product_id')->restrictOnDelete();
-            $table->primary(['cart_id', 'product_id'])->unique();
+            $table->unique(['cart_id', 'product_id']);
             $table->integer('quantity')->unsigned()->default(1);
             $table->timestamps();
         });

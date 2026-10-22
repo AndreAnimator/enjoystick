@@ -19,9 +19,9 @@ class Product extends Model
         'active',
     ];
 
-    public function carts(): HasMany
+    public function carts(): BelongsToMany
     {
-        return $this->hasMany(Cart::class)->withPivot('quantity');
+        return $this->belongsToMany(Cart::class)->withPivot('quantity');
     }
 
     public function categories(): HasOne
@@ -29,8 +29,8 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function orders(): HasMany
+    public function orders(): BelongsToMany
     {
-        return $this->hasMany(Order::class)->withPivot('product_name', 'unit_price', 'quantity');
+        return $this->belongsToMany(Order::class)->withPivot('product_name', 'unit_price', 'quantity');
     }
 }

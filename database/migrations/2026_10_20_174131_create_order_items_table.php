@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->cascadeOnDelete();
             $table->foreignId('product_id')->restrictOnDelete();
-            $table->primary(['order_id', 'product_id'])->unique();
+            $table->unique(['order_id', 'product_id']);
             $table->string('product_name', 255);
             $table->decimal('unit_price', 10, 2);
             $table->integer('quantity')->unsigned();

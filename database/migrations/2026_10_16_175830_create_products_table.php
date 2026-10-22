@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('image', 255)->nullable();
             $table->integer('stock')->default('0')->unsigned();
             $table->tinyInteger('active')->default('1');
-            $table->index('products');
             $table->index('category_id');
             $table->timestamps();
         });
