@@ -10,11 +10,27 @@ class Cart extends Model
     use HasFactory;
 
     protected $fillable = [
-        'total',
+        'token',
     ];
+
+    protected $hidden = [
+        'token',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'token' => 'hashed',
+        ];
+    }
     
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function product(): HasMany
+    {
+        return $this->hasMany(Product::class)->withPivot('quantity');
     }
 }

@@ -13,7 +13,6 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
-        'category',
         'price',
         'image',
         'stock',
@@ -25,7 +24,7 @@ class Product extends Model
         return $this->hasMany(Cart::class)->withPivot('quantity');
     }
 
-    public function categories(): BelongsTo
+    public function categories(): HasOne
     {
         return $this->belongsTo(Category::class);
     }
