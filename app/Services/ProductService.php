@@ -7,9 +7,24 @@ use Illuminate\Database\Eloquente\Collection;
 
 class ProductService
 {
+    public function listAllAdmin(): Collection
+    {
+        return Product::with('category')->all();
+    }
+
     public function listAll(): Collection
     {
-        return Product::all();
+        return Product::with('category')->where('active', 1);
+    }
+
+    public function search(string $search): Collection
+    {
+        return Product::with('category')->where($active)->whereLike('name', $search, caseSensitive: false)->get();
+    }
+
+    public function searchAdmin(): Collection
+    {
+        return Product::whereLike('name', $search, caseSensitive: false)->get();
     }
 
     public function create(array $data): Product
