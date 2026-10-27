@@ -3,21 +3,21 @@
 namespace App\Services;
 
 use App\Models\Product;
-use Illuminate\Database\Eloquente\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductService
 {
 
-    public function listAll(string $column_name = 'name', string $order = 'asc', string $category): Collection
+    public function listAll(string $column_name = 'name', string $order = 'asc', ?string $category): Collection
     {
         $perpage = 4;
-        $query = Product::with('category')->where('active', 1)->paginate($perpage)->orderBy($column_name, $order);
+        $query = Product::with('category')->where('active', 1)->paginate($perpage)->sortBy([$column_name, $order]);
         if ($category)
-            return $query->where('category', $category)->get();
-        return $query->get();
+            return $query->where('category', $category);
+        return $query;
     }
 
-    public function listAllAdmin(string $column_name = 'name', string $order = 'asc', string $category): Collection
+    public function listAllAdmin(string $column_name = 'name', string $order = 'asc', ?string $category): Collection
     {
         $perpage = 4;
         $query = Product::with('category')->all()->paginate($perpage)->orderBy($column_name, $order);
@@ -26,7 +26,7 @@ class ProductService
         return $query->get();
     }
 
-    public function search(string $column_name = 'name', string $order = 'asc', string $category, string $search): Collection
+    public function search(string $column_name = 'name', string $order = 'asc', ?string $category, string $search): Collection
     {
         $perpage = 10;
         $query = Product::with('category')->where($active, 1)->whereLike('name', $search, caseSensitive: false)->paginate($perpage)->orderBy($column_name, $order);
@@ -35,7 +35,7 @@ class ProductService
         return $query->get();
     }
 
-    public function searchAdmin(string $column_name = 'name', string $order = 'asc', string $category, string $search): Collection
+    public function searchAdmin(string $column_name = 'name', string $order = 'asc', ?string $category, string $search): Collection
     {
         $perpage = 10;
         $query = Product::whereLike('name', $search, caseSensitive: false)->paginate($perpage)->orderBy($column_name, $order);

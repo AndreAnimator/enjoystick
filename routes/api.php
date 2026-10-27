@@ -13,3 +13,5 @@ use Illuminate\Support\Facades\Route;
 });*/
 Route::apiResource('categories', CategoryController::class)
         ->whereNumber('category');
+Route::apiResource('products', ProductController::class)
+        ->whereNumber('product');
