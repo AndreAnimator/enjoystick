@@ -12,7 +12,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class UpdateProductRequest extends FormRequest
         return [
             'category_id' => ['sometimes', 'required', 'integer', 'exists:categories,id'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'text'],
+            'description' => ['sometimes', 'nullable'],
             'price' => ['sometimes', 'required', 'min:0.00'],
             'image' => ['sometimes', 'nullable', 'string'],
             'stock' => ['sometimes', 'integer', 'min:0'],

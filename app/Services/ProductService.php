@@ -8,59 +8,47 @@ use Illuminate\Database\Eloquent\Collection;
 class ProductService
 {
 
-    public function listAll(string $column_name = 'name', string $order = 'asc', ?string $category): Collection
+    public function listAll(string $column_name = 'name', string $order = 'asc', ?string $category, ?string $search, bool $is_admin = FALSE): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $perpage = 4;
-        $query = Product::with('category')->where('active', 1)->paginate($perpage)->sortBy([$column_name, $order]);
-        if ($category)
-            return $query->where('category', $category);
-        return $query;
-    }
 
-    public function listAllAdmin(string $column_name = 'name', string $order = 'asc', ?string $category): Collection
-    {
-        $perpage = 4;
-        $query = Product::with('category')->all()->paginate($perpage)->orderBy($column_name, $order);
-        if ($category)
-            return $query->where('category', $category)->get();
-        return $query->get();
-    }
+        $query = Product::with('category');
+        if(!$is_admin) {
+            $query->where('active', 1);
+        }
+        if ($category) {
+            $query->where('category', $category);
+        }
+        if ($search) {
+            $query->whereLike('name', "%$search%", caseSensitive: false);
+        }
+        $query->orderBy($column_name, $order);
 
-    public function search(string $column_name = 'name', string $order = 'asc', ?string $category, string $search): Collection
-    {
-        $perpage = 10;
-        $query = Product::with('category')->where($active, 1)->whereLike('name', $search, caseSensitive: false)->paginate($perpage)->orderBy($column_name, $order);
-        if ($category)
-            return $query->where('category', $category)->get();
-        return $query->get();
+        return $query->paginate($perpage);
     }
-
-    public function searchAdmin(string $column_name = 'name', string $order = 'asc', ?string $category, string $search): Collection
-    {
-        $perpage = 10;
-        $query = Product::whereLike('name', $search, caseSensitive: false)->paginate($perpage)->orderBy($column_name, $order);
-        if ($category)
-            return $query->where('category', $category)->get();
-        return $query->get();
-        
-    }
-
+    
     public function create(array $data): Product
     {
         return Product::create($data);
     }
 
-    public function findById(int $id): Product
+    public function findById(int $id, bool $is_admin = false): Product
     {
-        return Product::findOrFail($id)->where('active', 1);
-    }
-
-    public function findByIdAdmin(int $id): Product
-    {
-        return Product::findOrFail($id);
+        if ($is_admin) {
+            return Product::findOrFail($id);    
+        }
+        return Product::where('active', 1)->findOrFail($id);
     }
 
     public function update(int $id, array $data): Product
+    {
+        $product = Product::findOrFail($id);
+        $product->update($data);
+
+        return $product;
+    }
+
+    public function delete(int $id): void
     {
         Product::findOrFail($id)->delete();
     }

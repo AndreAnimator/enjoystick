@@ -20,41 +20,56 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         //string $column_name = 'name', string $order = 'asc', string $category
-        $column_name = $request->get('cn');
-        $order = $request->get('order');
-        $category = $request->get('category');
-        return ProductResource::collection($this->productService->listAll($column_name, $order, $category));
+        $data = $request->validate([
+            'column'   => 'sometimes|in:name,price,created_at',
+            'order'    => 'sometimes|in:asc,desc',
+            'category' => 'sometimes|integer|exists:categories,id',
+            'q' => 'sometimes',
+        ]);
+        $column = $data['column'] ?? 'name';
+        $order = $data['order'] ?? 'asc';
+        $category = $data['category'] ?? null;
+        $search = $data['q'] ?? null;
+        $is_admin = false;
+        return ProductResource::collection($this->productService->listAll($column, $order, $category, $search, $is_admin    ));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        $product = $this->productService->create($request->validated());
+        
+        return new ProductResource($product);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $id)
     {
-        //
+        $is_admin = false;
+        return new ProductResource($this->productService->findById($id, $is_admin));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, int $id)
     {
-        //
+        $product = $this->productService->update($id, $request->validated());
+    
+        return new ProductResource($product);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(int $id)
     {
-        //
+        $this->productService->delete($id);
+
+        return response()->noContent();
     }
 }
