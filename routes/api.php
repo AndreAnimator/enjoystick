@@ -15,7 +15,10 @@ Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1
 
 Route::apiResource('/categories', CategoryController::class, [
     'only' => ['index', 'show']
-])->whereNumber('category');;
+])->whereNumber('category');
+Route::apiResource('/products', ProductController::class, [
+    'only' => ['index', 'show']
+])->whereNumber('product');
 // ...
 
 /*
