@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class CategoryService
 {
-    public function listAll(): Collection
-    {
-        return Category::all();
-    }
-
     public function create(array $data): Category
     {
         return Category::create($data);
+    }
+
+    public function listAll(): Collection
+    {
+        return Category::all();
     }
 
     public function findById(int $id): Category

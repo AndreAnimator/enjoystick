@@ -68,7 +68,7 @@ class CartService
 
     public function resolve(?User $user, ?string $token)
     {
-        return $user ? findOrCreateForUser($user) : findOrCreateForVisitor;
+        return $user ? findOrCreateForUser($user) : findOrCreateForVisitor($token);
     }
 
     public function addItem(Cart $cart, int $productId, int $quantity): CartItem
@@ -184,7 +184,50 @@ class CartService
 
     public function mergeVisitorIntoUser(Cart $visitorCart, User $user): array
     {
+        if ($visitorCart->user_id !== null) {
+            return response()->json([
+                'message' => 'Não é carrinho de visitante.'
+            ], 422);
+        }
 
+        $warnings = [];
+
+        DB::transaction(function () {
+            $userCart = Cart::where('user_id', $user->id)->lockForUpdate()->first();
+            if (!$userCart) {
+                $userCart == Cart::create(['user_id' => $user->id, 'token' => generateToken()]);
+            }
+
+            $visitorItems = $visitorCart->items()->with('product')->get();
+
+            foreach ($visitorItems as $visitorItem) {
+                $product = Product::lockForUpdate()->find($visitorItem->product_id);
+                if (!$product || $product->active || $product->stock < 1) {
+                    $warnings[] = "$product->name está indisponível, foi descartado.";
+                    continue;
+                }
+                $exists = $userCart->items()->where('product_id', $visitorItem->product_id)->first();
+                if ($exists) {
+                    $wanting = $exists->quantity + $visitorItem->quantity;
+                    $newQuantity = min($wanting, $product->stock);
+                    if ($newQuantity < $quantity) {
+                        $warnings[] = "Quantidade de $product->name limitado ao estoque, $newQuantity";
+                    }
+                    $exists->quantity = $newQuantity;
+                    $exists->save();
+                }
+                else {
+                    $newQuantity = min($visitorItem->quantity, $product->stock);
+                    $userCart->items()->create([
+                        'product_id' => $visitorItem->product_id,
+                        'quantity' => $newQuantity,
+                    ]);
+                }
+            }
+            deleteCart($visitorCart);
+        });
+
+        return ['cart' => $userCart, 'warnings' => $warnings];
     }
 
     public function clearItems(Cart $cart): void
@@ -192,8 +235,9 @@ class CartService
         $cart->items()->delete();
     }
 
-    public function deleteCart(int $id): void
+    public function deleteCart(Cart $cart): void
     {
-        Cart::findOrFail($id)->delete();
+        $cart->items()->delete();
+        $cart->delete();
     }
 }

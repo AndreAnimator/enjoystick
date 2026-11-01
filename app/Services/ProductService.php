@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ProductService
 {
+    public function create(array $data): Product
+    {
+        return Product::create($data);
+    }
 
-    public function listAll(string $column_name = 'name', string $order = 'asc', ?string $category, ?string $search, bool $is_admin = FALSE): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function listAll(string $column_name = 'name', string $order = 'asc', ?int $category, ?string $search, bool $is_admin = FALSE): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $perpage = 4;
 
@@ -25,11 +29,6 @@ class ProductService
         $query->orderBy($column_name, $order);
 
         return $query->paginate($perpage);
-    }
-    
-    public function create(array $data): Product
-    {
-        return Product::create($data);
     }
 
     public function findById(int $id, bool $is_admin = false): Product
