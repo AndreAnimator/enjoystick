@@ -25,9 +25,10 @@ Route::apiResource('/products', ProductController::class, [
     'only' => ['index', 'show']
 ])->whereNumber('product');
 
-Route::apiResource('/carts', CartController::class, [
+Route::apiResource('/cart', CartController::class, [
     'only' => 'index'
 ]);
+Route::post   ('/cart/items',            [CartController::class, 'store']);
 // ...
 
 /*

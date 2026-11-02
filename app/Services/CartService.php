@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Product;
 use Illuminate\Database\Eloquente\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class CartService
 {
-    public function generateToken() {
+    private function generateToken() {
         return Str::random(64);
     }
 
@@ -37,17 +38,17 @@ class CartService
     public function findOrCreateForVisitor(?string $token): Cart
     {
         if (!$token) {
-            return Cart::create(['token' => generateToken(), 'user_id' => null]);
+            return Cart::create(['token' => $this->generateToken(), 'user_id' => null]);
         }
 
         $cart = Cart::where('token', $token)->first();
 
         if (!$cart) {
-            return Cart::create(['token' => generateToken(), 'user_id' => null]);
+            return Cart::create(['token' => $this->generateToken(), 'user_id' => null]);
         }
 
-        if ($cart.user_id !== null) {
-            return Cart::create(['token' => generateToken(), 'user_id' => null]);
+        if ($cart->user_id !== null) {
+            return Cart::create(['token' => $this->generateToken(), 'user_id' => null]);
         }
 
         return $cart;
@@ -60,7 +61,7 @@ class CartService
             return $cart;
         }
         try{
-            return Cart::create(['user_id' => $user->id, 'token' => generateToken()]);
+            return Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
         } catch (UniqueConstraintViolation) {
             Cart::where('user_id', $user->id)->firstOrFail();
         }
@@ -68,7 +69,7 @@ class CartService
 
     public function resolve(?User $user, ?string $token)
     {
-        return $user ? findOrCreateForUser($user) : findOrCreateForVisitor($token);
+        return $user ? $this->findOrCreateForUser($user) : $this->findOrCreateForVisitor($token);
     }
 
     public function addItem(Cart $cart, int $productId, int $quantity): CartItem
@@ -78,7 +79,7 @@ class CartService
             ValidationException (422); acho que isso vai ser tratado no controller com requests
         }
         */
-        return DB::transaction(function () {
+        return DB::transaction(function () use ($cart, $productId, $quantity) {
             $product = Product::lockForUpdate()->findOrFail($productId);
             if (!$product->active) {
                 // 422 "produto indisponível"
@@ -97,7 +98,7 @@ class CartService
 
             if ($item) {
                 $newQuantity = min($item->quantity + $quantity, $product->stock);
-                if ($newQuantity === $itemQuantity) {
+                if ($newQuantity === $item->quantity) {
                     return $item;
                 }
                 $item->quantity = $newQuantity;
@@ -110,6 +111,7 @@ class CartService
                     'quantity'   => $finalQuantity,
                 ]);
             }
+            // TODO retorno com o produto junto?
             return $item;
         });
     }
@@ -149,7 +151,7 @@ class CartService
     public function summary(Cart $cart): array
     {
         $items = $cart->items()->with('product')->get();
-
+        $token = $cart->token;
         $lines = [];
         $total = 0;
         $hasUnavailable = false;
@@ -165,6 +167,7 @@ class CartService
         }
         return [
             'items' => $lines,
+            'token' => $token,
             'total' => $total,
             'hasUnavailableItems' => $hasUnavailable,
         ];
