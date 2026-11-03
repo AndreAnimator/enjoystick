@@ -3,47 +3,52 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private AuthService $authService
+    ) {}
+
+    public function register(RegisterRequest $request)
     {
-        //
+        $user = $this->authService->register(
+            $request->validated(),
+            $request
+        );
+
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201)
+            ->header('Cache-Control', 'no-store');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function login(LoginRequest $request)
     {
-        //
+        $user = $this->authService->login(
+            $request->validated(),
+            $request
+        );
+
+        return (new UserResource($user))
+            ->response()
+            ->header('Cache-Control', 'no-store');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function me(Request $request)
     {
-        //
+        return new UserResource($request->user());
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function logout(Request $request)
     {
-        //
-    }
+        $this->authService->logout($request);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->noContent();
     }
 }

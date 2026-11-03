@@ -8,10 +8,13 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use Illuminate\Support\Facades\Route;
 
-/*
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1');
-*/
+
+Route::group(['middleware' => ['web']], function () {
+    Route::post('register', [AuthController::class, 'register'])
+    ->middleware('throttle:6,1');
+    Route::post('login', [AuthController::class, 'login'])
+    ->middleware('throttle:6,1');
+});
 
 // ************************** /
 // ROTAS PÚBLICAS
@@ -33,11 +36,15 @@ Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
 Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 // ...
 
-/*
+
 Route::middleware(['auth:sanctum'])
  ->group(function () {
-        // ... cart GET
-
+    Route::apiResource('/cart', CartController::class, [
+        'only' => 'index'
+    ]);
+    Route::post   ('/cart/items', [CartController::class, 'store']);
+    Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
+    Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 });
 
 Route::prefix('admin')
@@ -49,4 +56,3 @@ Route::prefix('admin')
                 ->whereNumber('product');
         // ...
 });
-*/
