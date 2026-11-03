@@ -28,7 +28,9 @@ Route::apiResource('/products', ProductController::class, [
 Route::apiResource('/cart', CartController::class, [
     'only' => 'index'
 ]);
-Route::post   ('/cart/items',            [CartController::class, 'store']);
+Route::post   ('/cart/items', [CartController::class, 'store']);
+Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
+Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 // ...
 
 /*

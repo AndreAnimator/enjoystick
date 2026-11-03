@@ -45,7 +45,7 @@ class CartController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $id)
     {
         //
     }
@@ -53,16 +53,26 @@ class CartController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCartItemRequest $request, int $id)
     {
-        //
+        $user = null;
+        $token = $request->header('X-Cart-Token') ?? null;
+        $cart = $this->cartService->resolve($user, $token);
+        $array = $request->validated();
+        $item = $this->cartService->updateItemQuantity($cart, $id, $array['quantity']);
+        // TODO retornar os items alterados?
+        return $item;
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, int $id)
     {
-        //
+        $user = null;
+        $token = $request->header('X-Cart-Token') ?? null;
+        $cart = $this->cartService->resolve($user, $token);
+        $this->cartService->removeItem($cart, $id);
+        return response()->noContent();
     }
 }

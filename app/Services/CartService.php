@@ -83,15 +83,15 @@ class CartService
             $product = Product::lockForUpdate()->findOrFail($productId);
             if (!$product->active) {
                 // 422 "produto indisponível"
-                return response()->json([
+                throw ValidationException::withMessages([
                     'message' => 'Produto indisponível.'
-                ], 422);
+                ]);
             }
             if ($product->stock < 1) {
                 // 422 "sem estoque"
-                return response()->json([
+                throw ValidationException::withMessages([
                     'message' => 'Produto sem estoque.'
-                ], 422);
+                ]);
             }
 
             $item = $cart->items()->where('product_id', $productId)->first();
@@ -118,28 +118,27 @@ class CartService
 
     public function updateItemQuantity(Cart $cart, int $itemId, int $itemQuantity): void
     {
-        $item = $cart->$items()->findOrFail($itemId);
-        if ($quantity < 1) {
-            $item->delete();
-            return;
-        }
-        DB::transaction(function () {
+        DB::transaction(function () use ($cart, $itemQuantity, $itemId) {
+            $item = $cart->items()->lockForUpdate()->findOrFail($itemId);
+            if ($itemQuantity < 1) {
+                $item->delete();
+                return;
+            }
             $product = Product::lockForUpdate()->findOrFail($item->product_id);
             if (!$product->active) {
-                return response()->json([
+                throw ValidationException::withMessages([
                     'message' => 'Produto inativo.'
-                ], 422);
+                ]);
             }
             if ($product->stock < 1) {
-                return response()->json([
+                throw ValidationException::withMessages([
                     'message' => 'Produto sem estoque.'
-                ], 422);
+                ]);
             }
-            $newQuantity = min($quantity, $product->stock);
+            $newQuantity = min($itemQuantity, $product->stock);
             $item->quantity = $newQuantity;
             $item->save();
         });
-        return;
     }
 
     public function removeItem(Cart $cart, int $itemId): void
@@ -163,7 +162,7 @@ class CartService
             }
             $subtotal = $available ? $product->price * $item->quantity : 0;
             $total += $subtotal;
-            $lines[] = [$product->id, $product->name, $product->price, $subtotal, $available];
+            $lines[] = [$product->id, $product->name, $product->price, $item->quantity, $subtotal, $available];
         }
         return [
             'items' => $lines,
@@ -188,9 +187,9 @@ class CartService
     public function mergeVisitorIntoUser(Cart $visitorCart, User $user): array
     {
         if ($visitorCart->user_id !== null) {
-            return response()->json([
+            throw ValidationException::withMessages([
                 'message' => 'Não é carrinho de visitante.'
-            ], 422);
+            ]);
         }
 
         $warnings = [];
