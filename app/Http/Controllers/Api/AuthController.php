@@ -7,12 +7,14 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private AuthService $authService
+        private AuthService $authService,
+        private CartService $cartService
     ) {}
 
     public function register(RegisterRequest $request)
@@ -34,6 +36,10 @@ class AuthController extends Controller
             $request->validated(),
             $request
         );
+        $response = [];
+        $token = $request->header('X-Cart-Token') ?? null;
+        $cart = $this->cartService->findOrCreateForVisitor($token);
+        $response = $this->cartService->mergeVisitorIntoUser($cart, $user);
 
         return (new UserResource($user))
             ->response()

@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateCartItemRequest;
 use Illuminate\Http\Request;
 use App\Http\Resources\CartResource;
 use App\Services\CartService;
+use App\Models\Cart;
 
 class CartController extends Controller
 {
@@ -19,11 +20,18 @@ class CartController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+
+    public function getCart(Request $request): Cart
     {
-        $user = null;
+        $user = $request->user() ?? null;
         $token = $request->header('X-Cart-Token') ?? null;
         $cart = $this->cartService->resolve($user, $token);
+        return $cart;
+    }
+
+    public function index(Request $request)
+    {
+        $cart = $this->getCart($request);
         // CartResource é inútil aqui?
         return $this->cartService->summary($cart);
     }
@@ -33,10 +41,7 @@ class CartController extends Controller
      */
     public function store(StoreCartItemRequest $request)
     {
-        // TODO perguntar se faço outra função pra isso
-        $user = null;
-        $token = $request->header('X-Cart-Token') ?? null;
-        $cart = $this->cartService->resolve($user, $token);
+        $cart = $this->getCart($request);
 
         $item = $request->validated();
         return $this->cartService->addItem($cart, $item['product_id'], $item['quantity']);

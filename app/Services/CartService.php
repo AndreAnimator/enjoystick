@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquente\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -194,10 +195,10 @@ class CartService
 
         $warnings = [];
 
-        DB::transaction(function () {
+        return DB::transaction(function () use ($warnings, $user, $visitorCart) {
             $userCart = Cart::where('user_id', $user->id)->lockForUpdate()->first();
             if (!$userCart) {
-                $userCart == Cart::create(['user_id' => $user->id, 'token' => generateToken()]);
+                $userCart == Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
             }
 
             $visitorItems = $visitorCart->items()->with('product')->get();
@@ -226,10 +227,9 @@ class CartService
                     ]);
                 }
             }
-            deleteCart($visitorCart);
+            $this->deleteCart($visitorCart);
+            return ['cart' => $userCart, 'warnings' => $warnings];
         });
-
-        return ['cart' => $userCart, 'warnings' => $warnings];
     }
 
     public function clearItems(Cart $cart): void
