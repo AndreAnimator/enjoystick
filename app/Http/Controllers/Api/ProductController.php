@@ -8,9 +8,13 @@ use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
 use App\Http\Resources\ProductResource;
 use App\Services\ProductService;
+use App\Http\Library\ApiHelpers;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class ProductController extends Controller
 {
+    use ApiHelpers;
+
     public function __construct(
         private ProductService $productService
     ) {}
@@ -30,8 +34,8 @@ class ProductController extends Controller
         $order = $data['order'] ?? 'asc';
         $category = $data['category'] ?? null;
         $search = $data['q'] ?? null;
-        $is_admin = false;
-        return ProductResource::collection($this->productService->listAll($column, $order, $category, $search, $is_admin    ));
+        $is_admin = $this->isAdmin($request->user());
+        return ProductResource::collection($this->productService->listAll($column, $order, $category, $search, $is_admin));
     }
 
     /**
@@ -39,6 +43,10 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw AuthorizationException;
+        }
         $product = $this->productService->create($request->validated());
         
         return new ProductResource($product);
@@ -47,9 +55,9 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(Request $request, int $id)
     {
-        $is_admin = false;
+        $is_admin = $this->isAdmin($request->user());
         return new ProductResource($this->productService->findById($id, $is_admin));
     }
 
@@ -58,6 +66,10 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, int $id)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw AuthorizationException;
+        }
         $product = $this->productService->update($id, $request->validated());
     
         return new ProductResource($product);
@@ -66,8 +78,12 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw AuthorizationException;
+        }
         $this->productService->delete($id);
 
         return response()->noContent();

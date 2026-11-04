@@ -21,7 +21,7 @@ class ProductService
             $query->where('active', 1);
         }
         if ($category) {
-            $query->where('category', $category);
+            $query->where('category_id', $category);
         }
         if ($search) {
             $query->whereLike('name', "%$search%", caseSensitive: false);

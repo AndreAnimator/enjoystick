@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum'])
 });
 
 Route::prefix('admin')
- ->middleware(['auth:sanctum', 'admin'])
+ ->middleware(['auth:sanctum'])
  ->group(function () {
         Route::apiResource('categories', CategoryController::class)
                 ->whereNumber('category');

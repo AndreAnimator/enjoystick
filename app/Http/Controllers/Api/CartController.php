@@ -60,9 +60,7 @@ class CartController extends Controller
      */
     public function update(UpdateCartItemRequest $request, int $id)
     {
-        $user = null;
-        $token = $request->header('X-Cart-Token') ?? null;
-        $cart = $this->cartService->resolve($user, $token);
+        $cart = $this->getCart($request);
         $array = $request->validated();
         $item = $this->cartService->updateItemQuantity($cart, $id, $array['quantity']);
         // TODO retornar os items alterados?
@@ -74,9 +72,7 @@ class CartController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
-        $user = null;
-        $token = $request->header('X-Cart-Token') ?? null;
-        $cart = $this->cartService->resolve($user, $token);
+        $cart = $this->getCart($request);
         $this->cartService->removeItem($cart, $id);
         return response()->noContent();
     }
