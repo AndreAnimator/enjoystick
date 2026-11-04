@@ -45,7 +45,7 @@ class ProductController extends Controller
     {
         $is_admin = $this->isAdmin($request->user());
         if (!$is_admin) {
-            throw AuthorizationException;
+            throw new AuthorizationException('This action is unauthorized.');
         }
         $product = $this->productService->create($request->validated());
         
@@ -68,7 +68,7 @@ class ProductController extends Controller
     {
         $is_admin = $this->isAdmin($request->user());
         if (!$is_admin) {
-            throw AuthorizationException;
+            throw new AuthorizationException('This action is unauthorized.');
         }
         $product = $this->productService->update($id, $request->validated());
     
@@ -82,7 +82,7 @@ class ProductController extends Controller
     {
         $is_admin = $this->isAdmin($request->user());
         if (!$is_admin) {
-            throw AuthorizationException;
+            throw new AuthorizationException('This action is unauthorized.');
         }
         $this->productService->delete($id);
 

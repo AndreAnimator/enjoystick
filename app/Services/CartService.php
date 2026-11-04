@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquente\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class CartService
 {
@@ -16,14 +18,21 @@ class CartService
         return Str::random(64);
     }
 
-    public function getByToken(?string $token): Cart
+    public function getByToken(?string $token): ?Cart
     {
+        /*
         if (!$token) {
-            $token = generateToken();
+            $token = $this->generateToken();
             $data = ['token' => $token];
             create($data);
         }
-        return Cart::where($token);
+        */
+        return Cart::find($token);
+    }
+
+    public function getByUser(User $user): ?Cart
+    {
+        return Cart::where('user_id', $user->id)->first();;
     }
 
     public function create(array $data): Cart
@@ -197,9 +206,13 @@ class CartService
 
         return DB::transaction(function () use ($warnings, $user, $visitorCart) {
             $userCart = Cart::where('user_id', $user->id)->lockForUpdate()->first();
+            Log::alert("User cart found:" . $userCart); 
             if (!$userCart) {
-                $userCart == Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
+                Log::alert("User id:" . $user);
+                $userCart = Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
+                Log::alert("User cart created:" . $userCart);
             }
+            Log::alert("User cart created:" . $userCart);
 
             $visitorItems = $visitorCart->items()->with('product')->get();
 
@@ -228,6 +241,7 @@ class CartService
                 }
             }
             $this->deleteCart($visitorCart);
+            Log::alert("User cart:" . $userCart);
             return ['cart' => $userCart, 'warnings' => $warnings];
         });
     }

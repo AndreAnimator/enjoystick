@@ -39,4 +39,11 @@ class AuthService
         $request->session()->invalidate();
         $request->session()->regenerateToken();
     }
+
+    public function update(array $data, Request $request): User
+    {
+        $user = User::findOrFail($request->user()->id);
+        $user->update($data);
+        return $user;
+    }
 }

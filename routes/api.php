@@ -14,6 +14,10 @@ Route::group(['middleware' => ['web']], function () {
     ->middleware('throttle:6,1');
     Route::post('login', [AuthController::class, 'login'])
     ->middleware('throttle:6,1');
+    Route::get('me', [AuthController::class, 'me'])
+    ->middleware('throttle:6,1');
+    Route::post('logout', [AuthController::class, 'logout'])
+    ->middleware('throttle:6,1');
 });
 
 // ************************** /
@@ -39,6 +43,8 @@ Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 
 Route::middleware(['auth:sanctum'])
  ->group(function () {
+    Route::post('user', [AuthController::class, 'update'])
+    ->middleware('throttle:6,1');
     Route::apiResource('/cart', CartController::class, [
         'only' => 'index'
     ]);
