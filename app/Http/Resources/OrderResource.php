@@ -36,6 +36,7 @@ class OrderResource extends JsonResource
             'cancelled_at' => $this->cancelled_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'items' => OrderItemResource::collection($this->whenLoaded('items')),
         ];
     }
 }

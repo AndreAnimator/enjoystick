@@ -17,7 +17,7 @@ class CancelOrderRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
+     * TODO acho que esse request é inútil
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array

@@ -7,10 +7,11 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Database\Eloquente\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 
 class OrderService
 {
@@ -18,11 +19,10 @@ class OrderService
     {
         return DB::transaction(function () use ($data, $request) {
             $order = Order::create($data);
-            $order->user_id = $request->user()->id;
-            $oder->save();
             // Dava pra pegar por token também
+            // TODO acho que não salvou como decimal
             $cart = Cart::where('user_id', $request->user()->id)->lockForUpdate()->first();
-            if (!$userCart || $cart->items() === null) {
+            if (!$cart || $cart->items() === null) {
                 throw ValidationException::withMessages([
                     'message' => 'Pedido feito com carrinho vazio/inexiste.'
                 ]);
@@ -50,23 +50,23 @@ class OrderService
                         'message' => 'Produto sem estoque.'
                     ]);
                 }
-                $quantity = $product->quantity - $cartItem->quantity;
+                $quantity = $product->stock- $cartItem->quantity;
                 $quantity = ($quantity < 0) ? 0 : $quantity;
-                $newQuantity = min( $product->quantity, $cartItem->quantity);
-                $product->quantity = $quantity;
+                $newQuantity = min( $product->stock, $cartItem->quantity);
+                $product->stock = $quantity;
                 $subtotal += $newQuantity;
                 $product->save();
                 $order->items()->create([
                     'product_id' => $cartItem->product_id,
-                    'product_name' => $cartItem->product()->name,
-                    'unit_price' => $cartItem->product()->price,
+                    'product_name' => $product->name,
+                    'unit_price' => $product->price,
                     'quantity' => $newQuantity,
                 ]);
             }
             $total = $subtotal + $shippingCost;
-            $cart->total = $total;
-            $cart->subtotal = $subtotal;
-            $cart->shipping_cost = $shippingCost;
+            $order->total = $total;
+            $order->subtotal = $subtotal;
+            $order->shipping_cost = $shippingCost;
             $cart->items()->delete();
             $cart->delete();
             return $order;
@@ -75,7 +75,7 @@ class OrderService
 
     public function listUserOrders(Request $request): Collection
     {
-        return Order::where('user_id', $request->user()->id);  
+        return Order::where('user_id', $request->user()->id)->get();  
     }
 
     public function listAll(): Collection
@@ -129,8 +129,9 @@ class OrderService
 
     public function cancel(Request $request, int $id): void
     {
+        // TODO cheque se foi pago
         DB::transaction(function () use ($id, $request) {
-            $order = Order::findOrFail($id)->lockForUpdate();
+            $order = Order::findOrFail($id);
             if ($request->user()->id !== $order->user_id) {
                 throw new AuthorizationException('This is not your order.');
             }
@@ -141,8 +142,8 @@ class OrderService
 
             foreach ($orderItems as $orderItem) {
                 $product = Product::lockForUpdate()->find($orderItem->product_id);
-                $quantity = $product->quantity + $orderItem->quantity;
-                $product->quantity = $quantity;
+                $quantity = $product->stock + $orderItem->quantity;
+                $product->stock = $quantity;
                 $product->save();
             }
         });

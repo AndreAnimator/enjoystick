@@ -24,21 +24,22 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['required', 'exists:users,id'],
+            'shipping_recipient_name' => ['required', 'string',  'max:100'],
+            'shipping_postal_code' => ['required', 'string',  'max:20'],
+            'shipping_street' => ['required', 'string',  'max:150'],
+            'shipping_number' => ['required', 'string',  'max:20'],
+            'shipping_complement' => ['nullable', 'string',  'max:100'],
+            'shipping_neighborhood' => ['required', 'string',  'max:100'],
+            'shipping_city' => ['required', 'string',  'max:100'],
+            'shipping_state' => ['required', 'string',  'max:100'],
+            'shipping_country' => ['required', 'string',  'max:100'],
             /*
             $table->foreignId('user_id')->unique()->restrictOnDelete();
             $table->enum('status', ['waiting', 'paid', 'sent', 'arrived', 'canceled'])->default('waiting');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_cost', 10, 2)->default(0.00);
             $table->decimal('total', 10, 2);
-            $table->string('shipping_recipient_name', 100);
-            $table->string('shipping_postal_code', 20);
-            $table->string('shipping_street', 150);
-            $table->string('shipping_number', 20);
-            $table->string('shipping_complement', 100)->nullable();
-            $table->string('shipping_neighborhood', 100);
-            $table->string('shipping_city', 100);
-            $table->string('shipping_state', 100);
-            $table->string('shipping_country', 100);
             $table->dateTime('paid_at', precision: 0)->nullable();
             $table->dateTime('sent_at', precision: 0)->nullable();
             $table->dateTime('arrived_at', precision: 0)->nullable();
@@ -47,5 +48,12 @@ class StoreOrderRequest extends FormRequest
             $table->timestamps(); 
             */
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => $this->user()->id,
+        ]);
     }
 }

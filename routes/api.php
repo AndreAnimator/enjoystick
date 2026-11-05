@@ -51,11 +51,18 @@ Route::middleware(['auth:sanctum'])
     Route::post   ('/cart/items', [CartController::class, 'store']);
     Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
     Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
+    
     Route::get    ('/addresses', [AddressController::class, 'index']);
     Route::post   ('/addresses', [AddressController::class, 'store']);
     Route::get    ('/addresses/{address}', [AddressController::class, 'show']);
     Route::patch  ('/addresses/{address}', [AddressController::class, 'update']);
     Route::delete ('/addresses/{address}', [AddressController::class, 'destroy']);
+    
+    Route::post   ('/orders', [OrderController::class, 'store']);
+    Route::get    ('/orders', [OrderController::class, 'index']);
+    Route::get    ('/orders/{order}', [OrderController::class, 'show']);
+    Route::post  ('/orders/{order}/pay', [OrderController::class, 'pay']);
+    Route::post ('/orders/{order}/cancel', [OrderController::class, 'cancel']);
 });
 
 Route::prefix('admin')
@@ -65,5 +72,6 @@ Route::prefix('admin')
                 ->whereNumber('category');
         Route::apiResource('products', ProductController::class)
                 ->whereNumber('product');
-        // ...
+        Route::get ('/orders', [OrderController::class, 'listAll']);
+        Route::patch ('/orders/{order}/status', [OrderController::class, 'update']);
 });

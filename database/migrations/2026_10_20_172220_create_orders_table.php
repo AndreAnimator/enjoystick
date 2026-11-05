@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->restrictOnDelete();
+            $table->foreignId('user_id')->restrictOnDelete();
             $table->enum('status', ['waiting', 'paid', 'sent', 'arrived', 'canceled'])->default('waiting');
-            $table->decimal('subtotal', 10, 2);
+            $table->decimal('subtotal', 10, 2)->default(0.00);
             $table->decimal('shipping_cost', 10, 2)->default(0.00);
-            $table->decimal('total', 10, 2);
+            $table->decimal('total', 10, 2)->default(0.00);
             $table->string('shipping_recipient_name', 100);
             $table->string('shipping_postal_code', 20);
             $table->string('shipping_street', 150);
