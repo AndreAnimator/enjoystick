@@ -10,6 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'status',
         'subtotal',
         'shipping_cost',
@@ -36,6 +37,6 @@ class Order extends Model
 
     public function product(): HasMany
     {
-        return $this->haMany(Product::class)->withPivot('product_name', 'unit_price', 'quantity');
+        return $this->haMany(Product::class);
     }
 }
