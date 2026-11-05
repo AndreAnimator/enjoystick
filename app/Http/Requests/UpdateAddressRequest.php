@@ -23,13 +23,15 @@ class UpdateAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id',
-            'name',
-            'description',
-            'price',
-            'image',
-            'stock',
-            'active',
+            'recipient_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'postal_code' => ['sometimes', 'required', 'string', 'max:100'],
+            'street' => ['sometimes', 'required', 'string', 'max:150'],
+            'number' => ['sometimes', 'required', 'string', 'max:20'],
+            'complement' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'neighborhood' => ['sometimes', 'required', 'string', 'max:100'],
+            'city' => ['sometimes', 'required', 'string', 'max:100'],
+            'state' => ['sometimes', 'required', 'string', 'max:100'],
+            'country' => ['sometimes', 'required', 'string', 'max:100'],
         ];
     }
 }

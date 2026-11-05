@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateAddressRequest;
 use App\Http\Resources\AddressResource;
 use App\Services\AddressService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AddressController extends Controller
 {
@@ -22,7 +23,7 @@ class AddressController extends Controller
     {
         $userId = $request->user()->id;
 
-        return AddressResource::collection($this->addressService->listAll($userId));
+        return AddressResource::collection($this->addressService->listByUser($userId));
     }
 
     /**
@@ -30,9 +31,7 @@ class AddressController extends Controller
      */
     public function store(StoreAddressRequest $request)
     {
-        $userId = $request->user()->id;
-
-        $address = $this->addressService->create($userId, $request->validated());
+        $address = $this->addressService->create($request->validated());
 
         return new AddressResource($address);
     }
@@ -40,9 +39,11 @@ class AddressController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(int $id, Request $request)
     {
-        return new AddressResource($this->addressService->finById($id));
+        $userId = $request->user()->id;
+
+        return new AddressResource($this->addressService->findById($id, $userId));
     }
 
     /**
@@ -50,16 +51,19 @@ class AddressController extends Controller
      */
     public function update(UpdateAddressRequest $request, int $id)
     {
-        // pensei em fazer $userId = $request->user()->id; mas teria q ser outra rota
-        $address = $this->addressService->update($id, $request->validated());
+        $userId = $request->user()->id;
+        $address = $this->addressService->update($id, $userId, $request->validated());
+
+        return new AddressResource($address);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(int $id, Request $request)
     {
-        $this->addressService->delete($id);
+        $userId = $request->user()->id;
+        $this->addressService->delete($id, $userId);
 
         return response()->noContent();
     }

@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Address;
-use Illuminate\Database\Eloquente\Collection;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class AddressService
 {
@@ -19,24 +20,35 @@ class AddressService
 
     public function listByUser(int $id): Collection
     {
-        return Address::where('user_id', $id);
+        return Address::where('user_id', $id)->get();
     }
 
-    public function findById(int $id): Address
-    {
-        return Address::findOrFail($id);
-    }
-
-    public function update(int $id, array $data): Adress
+    public function findById(int $id, int $userId): Address
     {
         $address = Address::findOrFail($id);
+        if ($address->user_id !== $userId) {
+            throw new AuthorizationException('This is not your address.');
+        }
+        return $address;
+    }
+
+    public function update(int $id, int $userId, array $data): Address
+    {
+        $address = Address::findOrFail($id);
+        if ($address->user_id !== $userId) {
+            throw new AuthorizationException('This is not your address.');
+        }
         $address->update($data);
 
         return $address;
     }
 
-    public function delete(int $id): void
+    public function delete(int $id, int $userId): void
     {
-        Address::findOrFail($id)->delete();
+        $address = Address::findOrFail($id);
+        if ($address->user_id !== $userId) {
+            throw new AuthorizationException('This is not your address.');
+        }
+        $address->delete();
     }
 }

@@ -43,7 +43,7 @@ Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
 
 Route::middleware(['auth:sanctum'])
  ->group(function () {
-    Route::post('user', [AuthController::class, 'update'])
+    Route::patch('user', [AuthController::class, 'update'])
     ->middleware('throttle:6,1');
     Route::apiResource('/cart', CartController::class, [
         'only' => 'index'
@@ -51,6 +51,11 @@ Route::middleware(['auth:sanctum'])
     Route::post   ('/cart/items', [CartController::class, 'store']);
     Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
     Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
+    Route::get    ('/addresses', [AddressController::class, 'index']);
+    Route::post   ('/addresses', [AddressController::class, 'store']);
+    Route::get    ('/addresses/{address}', [AddressController::class, 'show']);
+    Route::patch  ('/addresses/{address}', [AddressController::class, 'update']);
+    Route::delete ('/addresses/{address}', [AddressController::class, 'destroy']);
 });
 
 Route::prefix('admin')

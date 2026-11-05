@@ -23,13 +23,23 @@ class StoreAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id',
-            'name',
-            'description',
-            'price',
-            'image',
-            'stock',
-            'active',
+            'user_id' => ['required', 'exists:users,id'],
+            'recipient_name' => ['required', 'string', 'max:100'],
+            'postal_code' => ['required', 'string', 'max:100'],
+            'street' => ['required', 'string', 'max:150'],
+            'number' => ['required', 'string', 'max:20'],
+            'complement' => ['nullable', 'string', 'max:100'],
+            'neighborhood' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'country' => ['required', 'string', 'max:100'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => $this->user()->id,
+        ]);
     }
 }
