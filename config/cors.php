@@ -19,13 +19,13 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://127.0.0.1', 'http://localhost:8080/'],
+    'allowed_origins' => ['http://127.0.0.1', 'http://localhost:8080'],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['X-Cart-Token'],
 
     'max_age' => 600,
 

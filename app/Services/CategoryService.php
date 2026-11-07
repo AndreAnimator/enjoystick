@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class CategoryService
 {
@@ -32,6 +35,22 @@ class CategoryService
 
     public function delete(int $id): void
     {
-        Category::findOrFail($id)->delete();
+        DB::transaction(function () use ($id) {
+            $category = Category::lockForUpdate()->findOrFail($id);
+
+            $total = Product::where('category_id', $category->id)->count();
+ 
+            if ($total > 0) {
+                $ativos = Product::where('category_id', $category->id)->where('active', 1)->count();
+                $inativos = $total - $ativos;
+ 
+                throw new ConflictHttpException(
+                    "Não é possível excluir a categoria \"{$category->name}\": ela tem {$total} produto(s) vinculado(s) "
+                    . "({$ativos} ativo(s) e {$inativos} inativo(s)). Mova-os para outra categoria antes de excluir."
+                );
+            }
+ 
+            $category->delete();
+        });
     }
 }

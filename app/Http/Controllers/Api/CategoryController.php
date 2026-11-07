@@ -9,6 +9,7 @@ use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use App\Http\Library\ApiHelpers;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -65,7 +66,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
         $is_admin = $this->isAdmin($request->user());
         if (!$is_admin) {
