@@ -15,9 +15,10 @@ services:
       interval: 5s
       retries: 10
 
-  php:
+  api:
+    container_name: api
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile.dev
     depends_on:
       mysql:
@@ -33,10 +34,12 @@ services:
       DB_DATABASE: enjoystick
       DB_USERNAME: enjoystick
       DB_PASSWORD: enjoystick
+    expose:
+      - "8000"
     volumes:
-      - .:/app
+      - ./api:/app
       # vendor/ em volume próprio: o bind mount acima esconderia o vendor/ da imagem.
-      - php_vendor:/app/vendor
+      - api_vendor:/app/vendor
     command:
       - sh
       - -c
@@ -57,7 +60,26 @@ services:
       retries: 20
       # a primeira inicialização roda composer install, migrate e seed antes de responder
       start_period: 300s
+  frontend:
+    container_name: frontend
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    expose:
+      - "80"
 
+  proxy:
+    container_name: proxy
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "80:80"
 volumes:
   mysql_data:
-  php_vendor:
+  api_vendor:
