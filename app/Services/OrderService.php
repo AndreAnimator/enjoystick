@@ -13,9 +13,25 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class OrderService
 {
+    private const STATUS_TRANSITIONS = [
+        'waiting'  => ['paid', 'canceled'],
+        'paid'     => ['sent'],
+        'sent'     => ['arrived'],
+        'arrived'  => [],
+        'canceled' => [],
+    ];
+
+    private function restoreStock(Order $order): void
+    {
+        foreach ($order->items()->get() as $item) {
+            Product::whereKey($item->product_id)->increment('stock', $item->quantity);
+        }
+    }
+
     public function create(array $data, Request $request): Order
     {
         return DB::transaction(function () use ($data, $request) {
@@ -23,51 +39,49 @@ class OrderService
             // Dava pra pegar por token também
             // TODO acho que não salvou como decimal
             $cart = Cart::where('user_id', $request->user()->id)->lockForUpdate()->first();
-            if (!$cart || $cart->items()->exists() === null) {
+            if (!$cart || $cart->items()->doesntExist()) {
                 throw ValidationException::withMessages([
                     'message' => 'Pedido feito com carrinho vazio/inexistente.'
                 ]);
             }
-            $cartItems = $cart->items()->with('product')->get();
-            $subtotal = 0.00;
-            $total = 0.00;
-            $shippingCost = 10.00;
+            $cartItems = $cart->items()->with('product')->orderBy('product_id')->get();
+            $subtotal = '0.00';
+            $shippingCost = '10.00';
             
             foreach ($cartItems as $cartItem) {
                 $product = Product::lockForUpdate()->find($cartItem->product_id);
+                $name = $product?->name ?? "#{$cartItem->product_id}";
                 if ($cartItem->quantity < 1) {
-                    $item->delete();
                     throw ValidationException::withMessages([
-                        'message' => 'Quantidade de item do carrinho inválido.'
+                        'message' => "Quantidade inválida para \"{$name}\" no carrinho."
                     ]);
                 }
-                if (!$product->active) {
+                if (!$product || !$product->active) {
                     throw ValidationException::withMessages([
-                        'message' => 'Produto inativo.'
+                        'message' => "O produto \"{$name}\" está indisponível."
                     ]);
                 }
-                if ($product->stock < 1) {
+                if ($product->stock < $cartItem->quantity) {
                     throw ValidationException::withMessages([
-                        'message' => 'Produto sem estoque.'
+                        'message' => "Estoque insuficiente para \"{$name}\": disponível {$product->stock}, no carrinho {$cartItem->quantity}."
                     ]);
                 }
-                $quantity = $product->stock - $cartItem->quantity;
-                $quantity = ($quantity < 0) ? 0 : $quantity;
-                $newQuantity = min( $product->stock, $cartItem->quantity);
-                $product->stock = $quantity;
-                $subtotal += $product->price * $newQuantity;
+                $product->stock -= $cartItem->quantity;
                 $product->save();
+                $lineTotal = bcmul((string) $product->price, (string) $cartItem->quantity, 2);
+                $subtotal = bcadd($subtotal, $lineTotal, 2);
+
+                
                 $order->items()->create([
                     'product_id' => $cartItem->product_id,
                     'product_name' => $product->name,
                     'unit_price' => $product->price,
-                    'quantity' => $newQuantity,
+                    'quantity' => $cartItem->quantity,
                 ]);
             }
-            $total = $subtotal + $shippingCost;
-            $order->total = $total;
             $order->subtotal = $subtotal;
             $order->shipping_cost = $shippingCost;
+            $order->total = bcadd($subtotal, $shippingCost, 2);
             $order->save();
             $cart->items()->delete();
             $cart->delete();
@@ -80,15 +94,26 @@ class OrderService
         return Order::with('items')->where('user_id', $request->user()->id)->get();  
     }
 
-    public function listAll(): Collection
+    public function listAll(string $column_name = 'name', string $order = 'asc', ?int $status, ?string $search): Collection
     {
-        return Order::all();  
+        $perpage = 4;
+
+        $query = Order::with('items');
+        if ($status) {
+            $query->where('status', $status);
+        }
+        if ($search) {
+            $query->whereLike('name', "%$search%", caseSensitive: false);
+        }
+        $query->orderBy($column_name, $order);
+
+        return $query->paginate($perpage);
     }
 
     public function findById(Request $request, int $id): ?Order
     {
         $order = Order::with('items')->findOrFail($id);
-        if ($request->user()->id !== $order->user_id) {
+        if ($request->user()->id !== $order->user_id && $request->user()->role !== "admin") {
             throw new AuthorizationException('This is not your order.');
             return null;
         }
@@ -98,8 +123,13 @@ class OrderService
     public function pay(Request $request, int $id): Order
     {
         $order = Order::findOrFail($id);
-        if ($request->user()->id !== $order->user_id) {
+        if ($request->user()->id !== $order->user_id && $request->user()->role !== "admin") {
             throw new AuthorizationException('This is not your order.');
+        }
+        if ($order->status !== "waiting") {
+            throw ValidationException::withMessages([
+                'message' => 'Order is not waiting to be paid.'
+            ]);
         }
         $order->status = "paid";
         $order->paid_at = now();
@@ -110,24 +140,37 @@ class OrderService
     public function update(array $status_array, int $id): Order
     {
         $status = $status_array['status'];
-        $order = Order::findOrFail($id);
-        $order->status = $status;
-        switch ($status) {
-            case 'paid':
-                $order->paid_at = now();
-                break;
-            case 'sent':
-                $order->sent_at = now();
-                break;
-            case 'arrived':
-                $order->arrived_at = now();
-                break;
-            case 'canceled':
-                $order->cancelled_at = now();
-                break;
-        }
-        $order->save();
-        return $order;
+ 
+        return DB::transaction(function () use ($status, $id) {
+            $order = Order::lockForUpdate()->findOrFail($id);
+ 
+            $allowed = self::STATUS_TRANSITIONS[$order->status] ?? [];
+            if (!in_array($status, $allowed, true)) {
+                throw new ConflictHttpException(
+                    "Transição inválida: o pedido está '{$order->status}' e não pode ir para '{$status}'."
+                );
+            }
+ 
+            $order->status = $status;
+            switch ($status) {
+                case 'paid':
+                    $order->paid_at = now();
+                    break;
+                case 'sent':
+                    $order->sent_at = now();
+                    break;
+                case 'arrived':
+                    $order->arrived_at = now();
+                    break;
+                case 'canceled':
+                    $order->cancelled_at = now();
+                    $this->restoreStock($order);
+                    break;
+            }
+            $order->save();
+ 
+            return $order;
+        });
     }
 
     public function cancel(Request $request, int $id): order
@@ -135,7 +178,7 @@ class OrderService
         // TODO cheque se foi pago
         return DB::transaction(function () use ($request, $id) {
             $order = Order::lockForUpdate()->findOrFail($id);
-            if ($request->user()->id !== $order->user_id) {
+            if ($request->user()->id !== $order->user_id && $request->user()->role !== "admin") {
                 throw new AuthorizationException('This is not your order.');
             }
             if ($order->status !== "waiting") {

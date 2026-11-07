@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
 
         foreach($users as $user) {
             User::create($user);
-        };  
-    
+        };
+        User::find(1)->forceFill(['role' => 'admin'])->save();
     }
 }

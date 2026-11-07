@@ -23,11 +23,10 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // TODO categories não tá funcionando
         $data = $request->validate([
             'column'   => 'sometimes|in:name,price,created_at',
             'order'    => 'sometimes|in:asc,desc',
-            'category' => 'sometimes|integer|exists:categories,id',
+            'category' => 'sometimes|integer|nullable|exists:categories,id',
             'q' => 'sometimes',
         ]);
         $column = $data['column'] ?? 'name';

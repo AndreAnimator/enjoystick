@@ -34,7 +34,17 @@ class OrderController extends Controller
         if (!$is_admin) {
             throw new AuthorizationException('This action is unauthorized.');
         }
-        return OrderResource::collection($this->orderService->ListAll());
+        $data = $request->validate([
+            'column'   => 'sometimes|in:name,price,created_at',
+            'order'    => 'sometimes|in:asc,desc',
+            'status' => 'sometimes|in:paid,sent,arrived,cancelled',
+            'q' => 'sometimes',
+        ]);
+        $column = $data['column'] ?? 'name';
+        $order = $data['order'] ?? 'asc';
+        $status = $data['status'] ?? null;
+        $search = $data['q'] ?? null;
+        return OrderResource::collection($this->orderService->ListAll($column, $order, $status, $search));
     }
 
     /**

@@ -43,8 +43,9 @@ class CartController extends Controller
     {
         $cart = $this->getCart($request);
 
-        $item = $request->validated();
-        return $this->cartService->addItem($cart, $item['product_id'], $item['quantity']);
+        $data = $request->validated();
+        $item = $this->cartService->addItem($cart, $data['product_id'], $data['quantity']);
+        return response()->json(array_merge($item->toArray(), ['token' => $cart->token]));
     }
 
     /**

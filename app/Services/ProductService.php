@@ -49,6 +49,8 @@ class ProductService
 
     public function delete(int $id): void
     {
-        Product::findOrFail($id)->delete();
+        $product = Product::findOrFail($id);
+        $product->active = 0;
+        $product->save();
     }
 }

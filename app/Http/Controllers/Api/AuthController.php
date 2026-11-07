@@ -12,6 +12,7 @@ use App\Services\CartService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthenticationException;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
@@ -24,9 +25,7 @@ class AuthController extends Controller
     public function mergeCart(Request $request, User $user): array
     {
         $token = $request->header('X-Cart-Token') ?? null;
-        Log::alert("token:" . $token);
         $cart = $this->cartService->findOrCreateForVisitor($token);
-        Log::alert("cart:" . $cart); 
         return $this->cartService->mergeVisitorIntoUser($cart, $user);
     }
 
@@ -38,8 +37,8 @@ class AuthController extends Controller
         );
         // independente do token que for mandado sempre cria um novo
         $response = $this->mergeCart($request, $user);
-        Log::alert($response);
         return (new UserResource($user))
+            ->additional(['warnings' => $response['warnings']])
             ->response()
             ->setStatusCode(201)
             ->header('Cache-Control', 'no-store')
@@ -55,25 +54,30 @@ class AuthController extends Controller
         $token = $request->header('X-Cart-Token') ?? null;
         $currentCart = $this->cartService->getByToken($token);
         $userCart = $this->cartService->getByUser($user);
+        $response = null;
         if (!$currentCart) {
             $response = $this->mergeCart($request, $user);
         }
         elseif ($currentCart->user_id === null) {
             $response = $this->mergeCart($request, $user);
         }
-        elseif ($currentCart->user_id !== $user->id || $userCart->$token !== $token) {
+        elseif ($currentCart->user_id !== $user->id || $userCart->token !== $token) {
             throw ValidationException::withMessages([
                 'message' => 'Carrinho de outro usuário.'
             ]);
         }
         return (new UserResource($user))
+            ->additional(['warnings' => $response['warnings']])
             ->response()
             ->header('Cache-Control', 'no-store')
-            ->header('X-Cart-Token', (!$response) ? $userCart->$token : $response['cart']->token);
+            ->header('X-Cart-Token', (!$response) ? $userCart->token : $response['cart']->token);
     }
 
     public function me(Request $request)
     {
+        if (!$request->user()) {
+            throw new AuthenticationException('The user is not logged in.');
+        }
         return new UserResource($request->user());
     }
 
@@ -86,7 +90,6 @@ class AuthController extends Controller
 
     public function update(UpdateUserRequest $request)
     {
-        Log::alert("user:" . $request->user());
         $user = $this->authService->update($request->validated(), $request);
 
         return new UserResource($user);

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Log;
 
 class CartService
@@ -27,7 +28,7 @@ class CartService
             create($data);
         }
         */
-        return Cart::find($token);
+        return Cart::where('token', $token)->first();
     }
 
     public function getByUser(User $user): ?Cart
@@ -72,7 +73,7 @@ class CartService
         }
         try{
             return Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
-        } catch (UniqueConstraintViolation) {
+        } catch (UniqueConstraintViolationException) {
             Cart::where('user_id', $user->id)->firstOrFail();
         }
     }
@@ -206,27 +207,25 @@ class CartService
 
         return DB::transaction(function () use ($warnings, $user, $visitorCart) {
             $userCart = Cart::where('user_id', $user->id)->lockForUpdate()->first();
-            Log::alert("User cart found:" . $userCart); 
             if (!$userCart) {
-                Log::alert("User id:" . $user);
                 $userCart = Cart::create(['user_id' => $user->id, 'token' => $this->generateToken()]);
-                Log::alert("User cart created:" . $userCart);
             }
-            Log::alert("User cart created:" . $userCart);
 
             $visitorItems = $visitorCart->items()->with('product')->get();
 
             foreach ($visitorItems as $visitorItem) {
                 $product = Product::lockForUpdate()->find($visitorItem->product_id);
-                if (!$product || $product->active || $product->stock < 1) {
-                    $warnings[] = "$product->name está indisponível, foi descartado.";
+                if (!$product || !$product->active || $product->stock < 1) {
+                    if ($product) {
+                        $warnings[] = "$product->name está indisponível, foi descartado.";
+                    }
                     continue;
                 }
                 $exists = $userCart->items()->where('product_id', $visitorItem->product_id)->first();
                 if ($exists) {
                     $wanting = $exists->quantity + $visitorItem->quantity;
                     $newQuantity = min($wanting, $product->stock);
-                    if ($newQuantity < $quantity) {
+                    if ($newQuantity < $wanting) {
                         $warnings[] = "Quantidade de $product->name limitado ao estoque, $newQuantity";
                     }
                     $exists->quantity = $newQuantity;
@@ -241,7 +240,6 @@ class CartService
                 }
             }
             $this->deleteCart($visitorCart);
-            Log::alert("User cart:" . $userCart);
             return ['cart' => $userCart, 'warnings' => $warnings];
         });
     }

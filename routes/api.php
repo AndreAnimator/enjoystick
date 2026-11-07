@@ -14,8 +14,7 @@ Route::group(['middleware' => ['web']], function () {
     ->middleware('throttle:6,1');
     Route::post('login', [AuthController::class, 'login'])
     ->middleware('throttle:6,1');
-    Route::get('me', [AuthController::class, 'me'])
-    ->middleware('throttle:6,1');
+    Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout'])
     ->middleware('throttle:6,1');
 });
@@ -73,5 +72,8 @@ Route::prefix('admin')
         Route::apiResource('products', ProductController::class)
                 ->whereNumber('product');
         Route::get ('/orders', [OrderController::class, 'listAll']);
+        Route::get    ('/orders/{order}', [OrderController::class, 'show']);
+        Route::post  ('/orders/{order}/pay', [OrderController::class, 'pay']);
+        Route::post ('/orders/{order}/cancel', [OrderController::class, 'cancel']);
         Route::patch ('/orders/{order}/status', [OrderController::class, 'update']);
 });

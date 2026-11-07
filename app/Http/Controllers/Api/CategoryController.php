@@ -7,9 +7,12 @@ use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
+use App\Http\Library\ApiHelpers;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class CategoryController extends Controller
 {
+    use ApiHelpers;
 
     public function __construct(
         private CategoryService $categoryService
@@ -28,6 +31,10 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
         $category = $this->categoryService->create($request->validated());
 
         return new CategoryResource($category);
@@ -46,6 +53,10 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, string $id)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
         $category = $this->categoryService->update($id, $request->validated());
 
         return new CategoryResource($category);
@@ -56,6 +67,10 @@ class CategoryController extends Controller
      */
     public function destroy(int $id)
     {
+        $is_admin = $this->isAdmin($request->user());
+        if (!$is_admin) {
+            throw new AuthorizationException('This action is unauthorized.');
+        }
         $this->categoryService->delete($id);
 
         return response()->noContent();
