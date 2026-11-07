@@ -15,6 +15,8 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class OrderController extends Controller
 {
+    use ApiHelpers;
+
     public function __construct(
         private OrderService $orderService
     ) {}
@@ -68,9 +70,9 @@ class OrderController extends Controller
         return new OrderResource($this->orderService->pay($request, $id));
     }
 
-    public function cancel(int $id)
+    public function cancel(Request $request, int $id)
     {
-        return new OrderResource($this->orderService->cancel($id));
+        return new OrderResource($this->orderService->cancel($request, $id));
     }
 
     /**

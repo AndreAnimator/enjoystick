@@ -107,8 +107,9 @@ class OrderService
         return $order;
     }
 
-    public function update(string $status, int $id): Order
+    public function update(array $status_array, int $id): Order
     {
+        $status = $status_array['status'];
         $order = Order::findOrFail($id);
         $order->status = $status;
         switch ($status) {
@@ -122,21 +123,19 @@ class OrderService
                 $order->arrived_at = now();
                 break;
             case 'canceled':
-                $order->canceled_at = now();
+                $order->cancelled_at = now();
                 break;
         }
         $order->save();
         return $order;
     }
 
-    public function cancel(int $id): void
+    public function cancel(Request $request, int $id): order
     {
         // TODO cheque se foi pago
-        DB::transaction(function () use ($id) {
-            $order = Order::findOrFail($id);
-            Log::alert("order: " . $order);
-            $user = auth()->user();
-            if ($user->id !== $order->user_id) {
+        return DB::transaction(function () use ($request, $id) {
+            $order = Order::lockForUpdate()->findOrFail($id);
+            if ($request->user()->id !== $order->user_id) {
                 throw new AuthorizationException('This is not your order.');
             }
             if ($order->status !== "waiting") {
@@ -155,6 +154,7 @@ class OrderService
                 $product->stock = $quantity;
                 $product->save();
             }
+            return $order->load('items');
         });
     }
 }
