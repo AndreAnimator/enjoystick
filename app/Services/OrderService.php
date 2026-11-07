@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -22,9 +23,9 @@ class OrderService
             // Dava pra pegar por token também
             // TODO acho que não salvou como decimal
             $cart = Cart::where('user_id', $request->user()->id)->lockForUpdate()->first();
-            if (!$cart || $cart->items() === null) {
+            if (!$cart || $cart->items()->exists() === null) {
                 throw ValidationException::withMessages([
-                    'message' => 'Pedido feito com carrinho vazio/inexiste.'
+                    'message' => 'Pedido feito com carrinho vazio/inexistente.'
                 ]);
             }
             $cartItems = $cart->items()->with('product')->get();
@@ -50,11 +51,11 @@ class OrderService
                         'message' => 'Produto sem estoque.'
                     ]);
                 }
-                $quantity = $product->stock- $cartItem->quantity;
+                $quantity = $product->stock - $cartItem->quantity;
                 $quantity = ($quantity < 0) ? 0 : $quantity;
                 $newQuantity = min( $product->stock, $cartItem->quantity);
                 $product->stock = $quantity;
-                $subtotal += $newQuantity;
+                $subtotal += $product->price * $newQuantity;
                 $product->save();
                 $order->items()->create([
                     'product_id' => $cartItem->product_id,
@@ -67,15 +68,16 @@ class OrderService
             $order->total = $total;
             $order->subtotal = $subtotal;
             $order->shipping_cost = $shippingCost;
+            $order->save();
             $cart->items()->delete();
             $cart->delete();
-            return $order;
+            return $order->load('items');;
         });
     }
 
     public function listUserOrders(Request $request): Collection
     {
-        return Order::where('user_id', $request->user()->id)->get();  
+        return Order::with('items')->where('user_id', $request->user()->id)->get();  
     }
 
     public function listAll(): Collection
@@ -85,7 +87,7 @@ class OrderService
 
     public function findById(Request $request, int $id): ?Order
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('items')->findOrFail($id);
         if ($request->user()->id !== $order->user_id) {
             throw new AuthorizationException('This is not your order.');
             return null;
@@ -127,13 +129,20 @@ class OrderService
         return $order;
     }
 
-    public function cancel(Request $request, int $id): void
+    public function cancel(int $id): void
     {
         // TODO cheque se foi pago
-        DB::transaction(function () use ($id, $request) {
+        DB::transaction(function () use ($id) {
             $order = Order::findOrFail($id);
-            if ($request->user()->id !== $order->user_id) {
+            Log::alert("order: " . $order);
+            $user = auth()->user();
+            if ($user->id !== $order->user_id) {
                 throw new AuthorizationException('This is not your order.');
+            }
+            if ($order->status !== "waiting") {
+                throw ValidationException::withMessages([
+                    'message' => 'Order cannot be cancelled anymore.'
+                ]);
             }
             $order->status = "canceled";
             $order->cancelled_at = now();

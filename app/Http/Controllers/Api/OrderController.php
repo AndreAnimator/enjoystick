@@ -68,9 +68,9 @@ class OrderController extends Controller
         return new OrderResource($this->orderService->pay($request, $id));
     }
 
-    public function cancel(CancelOrderRequest $request, int $id)
+    public function cancel(int $id)
     {
-        return new OrderResource($this->orderService->cancel($request, $id));
+        return new OrderResource($this->orderService->cancel($id));
     }
 
     /**
