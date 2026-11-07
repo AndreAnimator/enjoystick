@@ -67,7 +67,7 @@ class AuthController extends Controller
             ]);
         }
         return (new UserResource($user))
-            ->additional(['warnings' => $response['warnings']])
+            ->additional(['warnings' => $response['warnings'] ?? []])
             ->response()
             ->header('Cache-Control', 'no-store')
             ->header('X-Cart-Token', (!$response) ? $userCart->token : $response['cart']->token);

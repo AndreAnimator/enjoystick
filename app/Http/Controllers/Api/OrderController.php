@@ -35,12 +35,12 @@ class OrderController extends Controller
             throw new AuthorizationException('This action is unauthorized.');
         }
         $data = $request->validate([
-            'column'   => 'sometimes|in:name,price,created_at',
+            'column'   => 'sometimes|in:total,paid_at,sent_at,arrived_at,cancelled_at,created_at',
             'order'    => 'sometimes|in:asc,desc',
-            'status' => 'sometimes|in:paid,sent,arrived,cancelled',
+            'status' => 'sometimes|in:paid,sent,arrived,canceled',
             'q' => 'sometimes',
         ]);
-        $column = $data['column'] ?? 'name';
+        $column = $data['column'] ?? 'created_at';
         $order = $data['order'] ?? 'asc';
         $status = $data['status'] ?? null;
         $search = $data['q'] ?? null;

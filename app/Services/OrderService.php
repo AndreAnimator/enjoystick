@@ -94,7 +94,7 @@ class OrderService
         return Order::with('items')->where('user_id', $request->user()->id)->get();  
     }
 
-    public function listAll(string $column_name = 'name', string $order = 'asc', ?int $status, ?string $search): Collection
+    public function listAll(string $column_name = 'created_at', string $order = 'asc', ?string $status, ?string $search): Collection
     {
         $perpage = 4;
 
@@ -103,7 +103,7 @@ class OrderService
             $query->where('status', $status);
         }
         if ($search) {
-            $query->whereLike('name', "%$search%", caseSensitive: false);
+            $query->items()->whereLike('name', "%$search%", caseSensitive: false);
         }
         $query->orderBy($column_name, $order);
 
@@ -127,9 +127,9 @@ class OrderService
             throw new AuthorizationException('This is not your order.');
         }
         if ($order->status !== "waiting") {
-            throw ValidationException::withMessages([
-                'message' => 'Order is not waiting to be paid.'
-            ]);
+            throw new ConflictHttpException(
+                "Transição inválida: o pedido está '{$order->status}' e não pode ser pago."
+            );
         }
         $order->status = "paid";
         $order->paid_at = now();
