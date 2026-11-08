@@ -12,16 +12,25 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $admin = User::firstOrCreate(
+            ['email' => 'gestorStock@enjoystick.com',
+                'name' => 'Gestor',
+                'password' => 'controleSt0q'
+            ]
+        );
+
+        if (! $admin->role === 'admin') {
+            $admin->forceFill(['role' => 'admin'])->save();
+        }
+
         $users = [
-            ['name' => 'Gestor', 'email' => 'gestorStock@enjoystick.com', 'password' => 'controleSt0q', 'role' => 'admin'],
             ['name' => 'Adriano Vasconscelos', 'email' => 'adrivasco@gmail.com', 'password' => 'V4sc0'],
             ['name' => 'Pedro Hercules', 'email' => 'ph.grego@outlook.com', 'password' => 'ph123ph'],
             ['name' => 'André Miranda', 'email' => 'estupidezhonesta@proton.com', 'password' => 'stupid123'],
         ];
 
         foreach($users as $user) {
-            User::create($user);
-        };
-        User::find(1)->forceFill(['role' => 'admin'])->save();
+            User::firstOrCreate($user);
+        }
     }
 }

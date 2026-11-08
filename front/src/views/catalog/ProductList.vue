@@ -1,9 +1,9 @@
 <script setup lang="ts">
-    export default {
-        data() {
-            return {
-            msg: 'Hello world!'
-            }
+    @Component
+    export default class ProductList extends Vue {
+        myData = "foo"
+        myMehtod() {
+            // code here...
         }
     }
 </script>
