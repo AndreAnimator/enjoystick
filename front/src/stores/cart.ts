@@ -1,43 +1,71 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import api from '@/api/client';
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import api from '@/api/client'
+import type { Cart, CartItem } from '@/types/models'
+
+interface CartResponse {
+  items: CartItem[]
+  total: string
+}
 
 export const useCartStore = defineStore('cart', () => {
-  const items = ref([]);
-  const total = ref(0);
-  const loading = ref(false);
+  const items = ref<CartItem[]>([])
+  const total = ref<string>('0.00')
+  const loading = ref<boolean>(false)
 
-  const itemCount = computed(() => items.value.reduce((sum, i) => sum + i.quantity, 0));
+  const itemCount = computed<number>(() =>
+    items.value.reduce((sum, i) => sum + i.quantity, 0)
+  )
 
-  async function fetchCart() {
-    loading.value = true;
+  function apply(data: CartResponse): void {
+    items.value = data.items
+    total.value = data.total
+  }
+
+  async function fetchCart(): Promise<Cart> {
+    loading.value = true
     try {
-      const { data } = await api.get('/api/cart');
-      items.value = data.items;
-      total.value = data.total;
+      const { data } = await api.get<CartResponse>('/api/cart')
+      apply(data)
+      return data as Cart
     } finally {
-      loading.value = false;
+      loading.value = false
     }
   }
 
-  async function addItem(productId, quantity = 1) {
-    const { data } = await api.post('/api/cart/items', { product_id: productId, quantity });
-    items.value = data.items;
-    total.value = data.total;
-    return data;
+  async function addItem(productId: number, quantity = 1): Promise<CartResponse> {
+    const { data } = await api.post<CartResponse>('/api/cart/items', {
+      product_id: productId,
+      quantity,
+    })
+    apply(data)
+    return data
   }
 
-  async function updateQuantity(itemId, quantity) {
-    const { data } = await api.patch(`/api/cart/items/${itemId}`, { quantity });
-    items.value = data.items;
-    total.value = data.total;
+  async function updateQuantity(itemId: number, quantity: number): Promise<void> {
+    const { data } = await api.patch<CartResponse>(`/api/cart/items/${itemId}`, { quantity })
+    apply(data)
   }
 
-  async function removeItem(itemId) {
-    const { data } = await api.delete(`/api/cart/items/${itemId}`);
-    items.value = data.items;
-    total.value = data.total;
+  async function removeItem(itemId: number): Promise<void> {
+    const { data } = await api.delete<CartResponse>(`/api/cart/items/${itemId}`)
+    apply(data)
   }
 
-  return { items, total, loading, itemCount, fetchCart, addItem, updateQuantity, removeItem };
-});
+  async function clear(): Promise<void> {
+    items.value = []
+    total.value = '0.00'
+  }
+
+  return {
+    items,
+    total,
+    loading,
+    itemCount,
+    fetchCart,
+    addItem,
+    updateQuantity,
+    removeItem,
+    clear,
+  }
+})

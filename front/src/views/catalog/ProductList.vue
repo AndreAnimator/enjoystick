@@ -1,15 +1,15 @@
 <script setup lang="ts">
-    @Component
-    export default class ProductList extends Vue {
-        myData = "foo"
-        myMehtod() {
-            // code here...
-        }
+    import { ref } from 'vue'
+
+    const myData = ref('foo')
+
+    function myMethod() {
+    // code here...
     }
 </script>
 
 <template>
-  <h1>You did it!</h1>
+  <h1>Product List!</h1>
 </template>
 
 <style scoped></style>

@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+    use AuthenticationException;
+    use ValidationException;
+    
     public function __construct(
         private AuthService $authService,
         private CartService $cartService

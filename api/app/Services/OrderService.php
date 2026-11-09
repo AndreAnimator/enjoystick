@@ -94,7 +94,7 @@ class OrderService
         return Order::with('items')->where('user_id', $request->user()->id)->get();  
     }
 
-    public function listAll(string $column_name = 'created_at', string $order = 'asc', ?string $status, ?string $search): Collection
+    public function listAll(string $column_name = 'created_at', string $order = 'asc', ?string $status, ?string $search): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $perpage = 4;
 
