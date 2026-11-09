@@ -11,6 +11,10 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected $attributes = [
+        'status' => 'waiting',
+    ];
+
     protected $fillable = [
         'user_id',
         'status',

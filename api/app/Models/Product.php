@@ -12,6 +12,11 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $attributes = [
+        'stock' => 0,
+        'active' => 1,
+    ];
+
     protected $fillable = [
         'category_id',
         'name',

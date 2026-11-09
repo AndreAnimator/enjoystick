@@ -72,7 +72,7 @@ class OrderController extends Controller
         if (!$is_admin) {
             throw new AuthorizationException('This action is unauthorized.');
         }
-        return new OrderResource($this->orderService->update($request->validated()), $id);
+        return new OrderResource($this->orderService->update($request->validated(), $id));
     }
 
     public function pay(PayOrderRequest $request, int $id)

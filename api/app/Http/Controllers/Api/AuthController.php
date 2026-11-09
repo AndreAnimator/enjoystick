@@ -12,14 +12,12 @@ use App\Services\CartService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Access\AuthenticationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    use AuthenticationException;
-    use ValidationException;
-    
+
     public function __construct(
         private AuthService $authService,
         private CartService $cartService

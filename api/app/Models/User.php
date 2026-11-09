@@ -20,6 +20,11 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
+    protected $attributes = [
+        'role' => 'client',
+    ];
+    
     protected $fillable = [
         'name',
         'email',
