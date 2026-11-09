@@ -9,7 +9,7 @@ const cart = useCartStore()
 
 onMounted(async () => {
   await auth.restoreSession()
-  await cart.fetchCart()
+  try { await cart.fetchCart() } catch { }
 })
 </script>
 

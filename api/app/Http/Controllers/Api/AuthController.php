@@ -78,7 +78,7 @@ class AuthController extends Controller
     {
         if (!$request->user()) {
             throw new AuthenticationException('The user is not logged in.');
-        }
+        } //Redundante o auth sanctum já faz isso
         return new UserResource($request->user());
     }
 

@@ -173,7 +173,7 @@ class CartService
             }
             $subtotal = $available ? $product->price * $item->quantity : 0;
             $total += $subtotal;
-            $lines[] = [$product->id, $product->name, $product->price, $item->quantity, $subtotal, $available];
+            $lines[] = [$product->id, $product->name, $product->price, $item->quantity, $subtotal, $available, $item->id];
         }
         return [
             'items' => $lines,

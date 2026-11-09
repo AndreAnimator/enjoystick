@@ -1,66 +1,54 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import api from '@/api/client'
-import type { Cart, CartItem } from '@/types/models'
-
-interface CartResponse {
-  items: CartItem[]
-  total: string
-}
-
+import * as cartApi from '@/api/cart'
+import type { Cart, CartLine } from '@/types/models'
 export const useCartStore = defineStore('cart', () => {
-  const items = ref<CartItem[]>([])
-  const total = ref<string>('0.00')
-  const loading = ref<boolean>(false)
-
-  const itemCount = computed<number>(() =>
-    items.value.reduce((sum, i) => sum + i.quantity, 0)
-  )
-
-  function apply(data: CartResponse): void {
-    items.value = data.items
-    total.value = data.total
+  const items = ref<CartLine[]>([])
+  const total = ref('0.00')
+  const token = ref<string | null>(localStorage.getItem('enjoystick_cart_token'))
+  const hasUnavailableItems = ref(false)
+  const loading = ref(false)
+  const itemCount = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))
+  function apply(cart: Cart): void {
+    items.value = cart.items
+    total.value = cart.total
+    hasUnavailableItems.value = Boolean(cart.hasUnavailableItems)
+    if (cart.token) {
+      token.value = cart.token
+      localStorage.setItem('enjoystick_cart_token', cart.token)
+    }
   }
-
-  async function fetchCart(): Promise<Cart> {
+  async function fetchCart(): Promise<void> {
     loading.value = true
     try {
-      const { data } = await api.get<CartResponse>('/api/cart')
-      apply(data)
-      return data as Cart
+      apply(await cartApi.getCart())
     } finally {
       loading.value = false
     }
   }
-
-  async function addItem(productId: number, quantity = 1): Promise<CartResponse> {
-    const { data } = await api.post<CartResponse>('/api/cart/items', {
-      product_id: productId,
-      quantity,
-    })
-    apply(data)
-    return data
+  async function addItem(productId: number, quantity = 1): Promise<void> {
+    await cartApi.addCartItem(productId, quantity)
+    await fetchCart()
   }
-
   async function updateQuantity(itemId: number, quantity: number): Promise<void> {
-    const { data } = await api.patch<CartResponse>(`/api/cart/items/${itemId}`, { quantity })
-    apply(data)
+    await cartApi.updateCartItem(itemId, quantity)
+    await fetchCart()
   }
-
   async function removeItem(itemId: number): Promise<void> {
-    const { data } = await api.delete<CartResponse>(`/api/cart/items/${itemId}`)
-    apply(data)
+    await cartApi.removeCartItem(itemId)
+    await fetchCart()
   }
-
-  async function clear(): Promise<void> {
+  function clear(): void {
     items.value = []
     total.value = '0.00'
+    hasUnavailableItems.value = false
   }
-
   return {
     items,
     total,
+    token,
     loading,
+    hasUnavailableItems,
     itemCount,
     fetchCart,
     addItem,

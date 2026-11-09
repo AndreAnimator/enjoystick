@@ -1,16 +1,14 @@
-<script setup lang="ts">
-    import { ref } from 'vue'
-
-    const myData = ref('foo')
-
-    function myMethod() {
-    // code here...
-    }
-
-</script>
-
 <template>
-  <h1>Admin Layout!</h1>
+  <section>
+    <h1>Administração</h1>
+    <nav aria-label="Administração">
+      <ul>
+        <li><RouterLink to="/admin/produtos">Produtos</RouterLink></li>
+        <li><RouterLink to="/admin/categorias">Categorias</RouterLink></li>
+        <li><RouterLink to="/admin/pedidos">Pedidos</RouterLink></li>
+        <li><RouterLink to="/">Voltar à loja</RouterLink></li>
+      </ul>
+    </nav>
+    <RouterView />
+  </section>
 </template>
-
-<style scoped></style>
