@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enjoystick API – Documentação</title>
+  <!--
+    Página estática servida direto de public/ (sem rota Laravel e sem Blade).
+    Os caminhos são absolutos de propósito: assim funcionam com ou sem a barra final em /api/docs.
+  -->
+  <link rel="stylesheet" href="/api/docs/assets/swagger-ui.css">
+  <style>
+    html { box-sizing: border-box; overflow-y: scroll; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin: 0; background: #fafafa; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <noscript>A documentação da API (Swagger UI) precisa de JavaScript.</noscript>
+
+  <script src="/api/docs/assets/swagger-ui-bundle.js"></script>
+  <script>
+    (function () {
+      var SPEC_URL = '/api/docs/openapi.yaml';
+      var CSRF_URL = '/sanctum/csrf-cookie';
+      var SAFE_METHODS = { GET: true, HEAD: true, OPTIONS: true };
+
+      function readCookie(name) {
+        var parts = document.cookie ? document.cookie.split('; ') : [];
+        for (var i = 0; i < parts.length; i++) {
+          var eq = parts[i].indexOf('=');
+          if (parts[i].slice(0, eq) === name) {
+            return decodeURIComponent(parts[i].slice(eq + 1));
+          }
+        }
+        return null;
+      }
+
+      // Só mexe nas chamadas "Try it out" para a própria API (mesma origem): /api/... (menos /api/docs/...) e /sanctum/...
+      function targetPath(url) {
+        var u = new URL(url, window.location.href);
+        if (u.origin !== window.location.origin) return null;
+        if (u.pathname.indexOf('/api/docs') === 0) return null;
+        if (u.pathname.indexOf('/api/') === 0 || u.pathname.indexOf('/sanctum/') === 0) return u.pathname;
+        return null;
+      }
+
+      // Sanctum SPA: o cookie XSRF-TOKEN vem de /sanctum/csrf-cookie e precisa voltar no header X-XSRF-TOKEN.
+      // É renovado antes de cada escrita porque o logout regenera o token e deixaria o cookie antigo inválido (419).
+      function refreshCsrfCookie() {
+        return fetch(CSRF_URL, {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json' }
+        });
+      }
+
+      function setHeader(headers, name, value) {
+        Object.keys(headers).forEach(function (key) {
+          if (key.toLowerCase() === name.toLowerCase()) delete headers[key];
+        });
+        headers[name] = value;
+      }
+
+      window.ui = SwaggerUIBundle({
+        url: SPEC_URL,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        docExpansion: 'list',
+        defaultModelsExpandDepth: 1,
+        displayRequestDuration: true,
+        validatorUrl: null,        // sem chamadas externas
+        withCredentials: true,     // cookies de sessão nas chamadas "Try it out"
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: 'BaseLayout',
+        requestInterceptor: function (req) {
+          var path = targetPath(req.url);
+          if (!path) return req;
+
+          req.credentials = 'include';
+          req.headers = req.headers || {};
+          // Sem isto, falhas de validação/autenticação seriam redirecionadas em vez de devolver JSON.
+          setHeader(req.headers, 'Accept', 'application/json');
+
+          var method = (req.method || 'GET').toUpperCase();
+          if (SAFE_METHODS[method] || path.indexOf('/sanctum/') === 0) return req;
+
+          return refreshCsrfCookie()
+            .catch(function () { /* segue sem renovar; a API responderá 419 se faltar */ })
+            .then(function () {
+              var token = readCookie('XSRF-TOKEN');
+              if (token) setHeader(req.headers, 'X-XSRF-TOKEN', token);
+              return req;
+            });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
