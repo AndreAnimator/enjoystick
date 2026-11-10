@@ -33,8 +33,8 @@ A primeira vez demora mais. Quando aparecer `Server running on [http://0.0.0.0:8
 
 | Serviço | Endereço |
 | --- | --- |
-| API | http://localhost:8000/api |
-| Health check | http://localhost:8000/up |
+| API | http://localhost/api |
+| Health check | http://localhost/up |
 | MySQL | `localhost:3306` (banco `enjoystick`, usuário `enjoystick`, senha `enjoystick`) |
 
 Comandos úteis:
