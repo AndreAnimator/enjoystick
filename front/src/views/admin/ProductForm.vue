@@ -25,7 +25,7 @@ async function submit() {
     await saveProduct(
       {
         ...form.value,
-        price: Number(form.value.price),
+        price: form.value.price,
         description: form.value.description || null,
         image: form.value.image || null,
       },

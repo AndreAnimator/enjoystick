@@ -65,7 +65,7 @@ services:
       context: ./front
       dockerfile: Dockerfile
     expose:
-      - "8080"
+      - "80"
 
   proxy:
     container_name: proxy
@@ -78,7 +78,7 @@ services:
       frontend:
         condition: service_started
     ports:
-      - "8080:8080"
+      - "80:80"
 volumes:
   mysql_data:
   api_vendor:
