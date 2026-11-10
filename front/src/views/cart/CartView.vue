@@ -55,6 +55,6 @@ onMounted(async () => {
     <p>
       <strong>Total: R$ {{ Number(cart.total).toFixed(2) }}</strong>
     </p>
-    <RouterLink v-if="cart.items.length" to="/checkout">Continuar para entrega</RouterLink>
+    <RouterLink v-if="cart.items.length && !cart.hasUnavailableItems" to="/checkout">Continuar para entrega</RouterLink>
   </section>
 </template>

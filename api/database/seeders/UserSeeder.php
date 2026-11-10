@@ -19,9 +19,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        if (! $admin->role === 'admin') {
-            $admin->forceFill(['role' => 'admin'])->save();
-        }
+        $admin->forceFill(['role' => 'admin'])->save();
 
         $users = [
             ['name' => 'Adriano Vasconscelos', 'email' => 'adrivasco@gmail.com', 'password' => 'V4sc0'],
