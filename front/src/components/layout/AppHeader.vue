@@ -19,7 +19,7 @@ async function handleLogout(): Promise<void> {
     <nav class="flex h-full w-full p-0 items-center">
       <RouterLink
         to="/"
-        class="flex h-full w-1/4 shrink-0 items-center justify-center"
+        class="flex h-full w-1/4 shrink-0 items-center justify-center border-b-5 border-[#C9007A]"
       >
         <img
           src="./../../assets/LOGO.png"
@@ -28,36 +28,43 @@ async function handleLogout(): Promise<void> {
         />
       </RouterLink>
       <div class="flex h-full flex-1 items-stretch gap-1 bg-[#C9007A] rounded-tl-[18px] border-b-0 border-5 border-[#C9007A]">
-        <RouterLink to="/" text-3xl
-          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#D9D9D9] px-2 text-[#C9007A] hover:bg-[#f1abd5] whitespace-nowrap"
+        <RouterLink to="/"
+          exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white hover:bg-[#f1abd5] hover:text-[#C9007A] whitespace-nowrap hover:border-b-5"
         >Catálogo</RouterLink>
         <RouterLink to="/carrinho"
-          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap"
+          exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
         >
           Carrinho ({{ cart.itemCount }})
         </RouterLink>
 
         <template v-if="auth.isAuthenticated">
           <RouterLink to="/meus-pedidos"
-            class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap"
+            exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+            class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Meus Pedidos</RouterLink>
           <RouterLink to="/perfil"
-          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap"
+          exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+          class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Perfil</RouterLink>
           <RouterLink v-if="auth.isAdmin" to="/admin"
-            class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap"
+            exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+            class="flex flex-1 items-center justify-center gap-1 rounded-t-xl bg-[#C9007A] px-2 text-white whitespace-nowrap hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Painel Admin</RouterLink>
           <button type="button" @click="handleLogout"
-            class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white"
+            class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Sair</button>
         </template>
 
         <template v-else>
           <RouterLink to="/login"
-          class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white"
+          exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+          class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Entrar</RouterLink>
           <RouterLink to="/registro"
-          class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white"
+          exact-active-class="!bg-[#D9D9D9] !text-[#C9007A] hover:!border-b-0"
+          class="flex flex-1 items-center justify-center rounded-t-xl bg-[#C9007A] px-2 text-white hover:bg-[#f1abd5] hover:text-[#C9007A] hover:border-b-5"
           >Registrar</RouterLink>
         </template>
       </div>

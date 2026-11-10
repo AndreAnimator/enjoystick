@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2)->unsigned();
-            $table->string('image', 255)->nullable();
+            $table->string('image', 1000)->nullable();
             $table->integer('stock')->default('0')->unsigned();
             $table->tinyInteger('active')->default('1');
             $table->index('category_id');
