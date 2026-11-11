@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum'])
 });
 
 Route::prefix('admin')
+ ->name('admin.')
  ->middleware(['auth:sanctum'])
  ->group(function () {
         Route::apiResource('categories', CategoryController::class)
