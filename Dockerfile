@@ -31,7 +31,7 @@ COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/dist /usr/share/nginx/html
 
 # Certificado CA do TiDB Cloud
-COPY docker/tidb-ca.pem /etc/ssl/certs/tidb-ca.pem
+COPY docker/ca.pem /etc/ssl/certs/ca.pem
 
 # Configuração do Nginx e script de entrada
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
