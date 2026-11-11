@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@font-face {
+  font-family: HelveticaRounded;
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url("./fonts/Helvetica Rounded LT Std Bold.otf") format("otf");
+}

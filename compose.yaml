@@ -15,23 +15,70 @@ services:
       interval: 5s
       retries: 10
 
-  php:
+  api:
+    container_name: api
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile.dev
     depends_on:
       mysql:
         condition: service_healthy
     ports:
       - "8000:8000"
+    environment:
+      # Têm prioridade sobre o .env (o .env.example vem com DB_CONNECTION=sqlite).
+      APP_URL: http://localhost
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: enjoystick
+      DB_USERNAME: enjoystick
+      DB_PASSWORD: enjoystick
+    expose:
+      - "8000"
     volumes:
-      - .:/app
+      - ./api:/app
+      # vendor/ em volume próprio: o bind mount acima esconderia o vendor/ da imagem.
+      - api_vendor:/app/vendor
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        [ -f .env ] || cp .env.example .env
+        grep -q '^APP_KEY=.\+' .env || php artisan key:generate --force
+        composer install --no-interaction --prefer-dist
+        php artisan migrate:fresh --seed --force
+        # --no-reload: sem isso o artisan serve descarta as variáveis de ambiente acima
+        # (menos as da lista interna dele) e o app voltaria a ler o DB do .env.
+        exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/up"]
       interval: 5s
       timeout: 3s
       retries: 20
-      start_period: 30s
+      # a primeira inicialização roda composer install, migrate e seed antes de responder
+      start_period: 300s
+  frontend:
+    container_name: frontend
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    expose:
+      - "80"
 
+  proxy:
+    container_name: proxy
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "80:80"
 volumes:
   mysql_data:
+  api_vendor:
