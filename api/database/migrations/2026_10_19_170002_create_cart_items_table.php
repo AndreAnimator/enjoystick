@@ -21,11 +21,6 @@ return new class extends Migration
         });
     }
 
-    /*
-    UNIQUE KEY uq_cart_product (cart_id, product_id),
-    CONSTRAINT chk_cart_items_qty CHECK (quantity > 0),
-    */
-
     /**
      * Reverse the migrations.
      */

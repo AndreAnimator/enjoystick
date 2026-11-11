@@ -22,9 +22,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-    /*
-    CONSTRAINT chk_order_items_qty CHECK (quantity > 0)
-    */
 
     /**
      * Reverse the migrations.

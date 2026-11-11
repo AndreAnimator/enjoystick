@@ -74,7 +74,6 @@ class AddressSeeder extends Seeder
             $user = User::where('email', $email)->firstOrFail();
 
             foreach ($userAddresses as $address) {
-                // firstOrCreate: rodar este seeder sozinho de novo não duplica endereços.
                 Address::firstOrCreate(
                     ['user_id' => $user->id, 'street' => $address['street'], 'number' => $address['number']],
                     Arr::except($address, ['street', 'number'])

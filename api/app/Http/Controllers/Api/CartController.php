@@ -32,7 +32,6 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $cart = $this->getCart($request);
-        // CartResource é inútil aqui?
         return $this->cartService->summary($cart);
     }
 
@@ -64,7 +63,6 @@ class CartController extends Controller
         $cart = $this->getCart($request);
         $array = $request->validated();
         $item = $this->cartService->updateItemQuantity($cart, $id, $array['quantity']);
-        // TODO retornar os items alterados?
         return $item;
     }
 

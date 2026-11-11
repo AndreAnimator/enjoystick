@@ -23,7 +23,6 @@ class StoreCartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'user' => user.id
             'token' => ['required', 'nullable', 'string'],
         ];
     }

@@ -36,7 +36,6 @@ class AuthController extends Controller
             $request->validated(),
             $request
         );
-        // independente do token que for mandado sempre cria um novo
         $response = $this->mergeCart($request, $user);
         return (new UserResource($user))
             ->additional(['warnings' => $response['warnings']])
@@ -78,7 +77,7 @@ class AuthController extends Controller
     {
         if (!$request->user()) {
             throw new AuthenticationException('The user is not logged in.');
-        } //Redundante o auth sanctum já faz isso
+        }
         return new UserResource($request->user());
     }
 

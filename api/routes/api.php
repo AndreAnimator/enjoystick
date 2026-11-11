@@ -44,14 +44,6 @@ Route::middleware(['auth:sanctum'])
  ->group(function () {
     Route::patch('user', [AuthController::class, 'update'])
     ->middleware('throttle:6,1');
-    /*
-    Route::apiResource('/cart', CartController::class, [
-        'only' => 'index'
-    ]);
-    Route::post   ('/cart/items', [CartController::class, 'store']);
-    Route::patch  ('/cart/items/{cartItem}', [CartController::class, 'update']);
-    Route::delete ('/cart/items/{cartItem}', [CartController::class, 'destroy']);
-    */
     Route::get    ('/addresses', [AddressController::class, 'index']);
     Route::post   ('/addresses', [AddressController::class, 'store']);
     Route::get    ('/addresses/{address}', [AddressController::class, 'show']);

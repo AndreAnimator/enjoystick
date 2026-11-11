@@ -16,7 +16,6 @@ class CartResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            // 'user' => new UserResource($this->whenLoaded('user')),
             'token' => $this->token,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

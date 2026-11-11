@@ -26,9 +26,9 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
                 CategorySeeder::class,
                 ProductSeeder::class,
-                AddressSeeder::class, // depende dos usuários
-                CartSeeder::class,    // depende de usuários e produtos
-                OrderSeeder::class,   // depende de usuários, endereços e produtos
+                AddressSeeder::class,
+                CartSeeder::class,
+                OrderSeeder::class,
             ]);
         });
     }

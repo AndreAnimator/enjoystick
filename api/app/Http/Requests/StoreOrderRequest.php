@@ -12,7 +12,6 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        //  return $this->user()->id == $this->user_id;
         return true;
     }
 
@@ -34,19 +33,6 @@ class StoreOrderRequest extends FormRequest
             'shipping_city' => ['required', 'string',  'max:100'],
             'shipping_state' => ['required', 'string',  'max:100'],
             'shipping_country' => ['required', 'string',  'max:100'],
-            /*
-            $table->foreignId('user_id')->unique()->restrictOnDelete();
-            $table->enum('status', ['waiting', 'paid', 'sent', 'arrived', 'canceled'])->default('waiting');
-            $table->decimal('subtotal', 10, 2);
-            $table->decimal('shipping_cost', 10, 2)->default(0.00);
-            $table->decimal('total', 10, 2);
-            $table->dateTime('paid_at', precision: 0)->nullable();
-            $table->dateTime('sent_at', precision: 0)->nullable();
-            $table->dateTime('arrived_at', precision: 0)->nullable();
-            $table->dateTime('cancelled_at', precision: 0)->nullable();
-            $table->index('status');
-            $table->timestamps(); 
-            */
         ];
     }
 

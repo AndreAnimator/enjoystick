@@ -21,13 +21,6 @@ class CartService
 
     public function getByToken(?string $token): ?Cart
     {
-        /*
-        if (!$token) {
-            $token = $this->generateToken();
-            $data = ['token' => $token];
-            create($data);
-        }
-        */
         return Cart::where('token', $token)->first();
     }
 
@@ -85,21 +78,14 @@ class CartService
 
     public function addItem(Cart $cart, int $productId, int $quantity): CartItem
     {
-        /*
-        if ($quantity < 1) {
-            ValidationException (422); acho que isso vai ser tratado no controller com requests
-        }
-        */
         return DB::transaction(function () use ($cart, $productId, $quantity) {
             $product = Product::lockForUpdate()->findOrFail($productId);
             if (!$product->active) {
-                // 422 "produto indisponível"
                 throw ValidationException::withMessages([
                     'message' => 'Produto indisponível.'
                 ]);
             }
             if ($product->stock < 1) {
-                // 422 "sem estoque"
                 throw ValidationException::withMessages([
                     'message' => 'Produto sem estoque.'
                 ]);
@@ -122,7 +108,6 @@ class CartService
                     'quantity'   => $finalQuantity,
                 ]);
             }
-            // TODO retorno com o produto junto?
             return $item;
         });
     }

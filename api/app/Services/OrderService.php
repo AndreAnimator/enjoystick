@@ -36,8 +36,6 @@ class OrderService
     {
         return DB::transaction(function () use ($data, $request) {
             $order = Order::create($data);
-            // Dava pra pegar por token também
-            // TODO acho que não salvou como decimal
             $cart = Cart::where('user_id', $request->user()->id)->lockForUpdate()->first();
             if (!$cart || $cart->items()->doesntExist()) {
                 throw ValidationException::withMessages([
@@ -175,7 +173,6 @@ class OrderService
 
     public function cancel(Request $request, int $id): order
     {
-        // TODO cheque se foi pago
         return DB::transaction(function () use ($request, $id) {
             $order = Order::lockForUpdate()->findOrFail($id);
             if ($request->user()->id !== $order->user_id && $request->user()->role !== "admin") {

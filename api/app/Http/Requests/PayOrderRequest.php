@@ -19,7 +19,6 @@ class PayOrderRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
-     * TODO acho que esse request é inutil, e o de cancelar também
      */
     public function rules(): array
     {
