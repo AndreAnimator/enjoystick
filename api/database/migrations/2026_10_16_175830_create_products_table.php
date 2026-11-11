@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->restrictOnDelete(); // TODO impedir de deletar categorias com produtos
+            $table->foreignId('category_id')->constrained()->restrictOnDelete();
             $table->string('name', 255);
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2)->unsigned();
