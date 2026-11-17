@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://127.0.0.1', 'http://127.0.0.1:5173', 'http://localhost:8080', 'http://localhost:5173', '127.0.0.1:8080', 'https://enjoystick.onrender.com/', 'enjoystick.onrender.com'],
+    'allowed_origins' => ['http://127.0.0.1', 'http://127.0.0.1:5173', 'http://localhost:8080', 'http://localhost:5173', '127.0.0.1:8080', 'https://enjoystick.onrender.com/', 'enjoystick.onrender.com', 'https://andreanimator.github.io/enjoystick-docs', 'https://andreanimator.github.io/enjoystick-docs/', 'andreanimator.github.io/enjoystick-docs', 'andreanimator.github.io/enjoystick-docs/'],
 
     'allowed_origins_patterns' => [],
 

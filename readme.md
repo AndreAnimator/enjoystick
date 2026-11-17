@@ -1,5 +1,13 @@
 # Enjoystick: API da loja virtual
 
+<img align="center" src="./assets/LOGO BANNER.png">
+
+<div align="center">
+[![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE) 
+![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white) 
+![Vue.js](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
+</div>
+
 API REST em Laravel de uma loja virtual de controles e acessórios para jogos. Cobre a jornada completa de compra: catálogo público, carrinho de visitante, fusão do carrinho no login, checkout com baixa de estoque, pagamento simulado, acompanhamento de pedidos e uma área administrativa.
 
 > Projeto final do curso. O pagamento é **simulado**: nenhum dado de cartão é solicitado, trafegado ou armazenado.
@@ -167,3 +175,58 @@ Todas com o prefixo `/api`.
 | `POST`, `PUT`, `DELETE /admin/categories` | CRUD de categorias | Admin |
 | `GET /admin/orders` | Lista todos os pedidos da loja (filtro opcional `?status=`) | Admin |
 | `PATCH /admin/orders/{id}/status` | Avança o status do pedido | Admin |
+
+
+## Telas
+
+### Catálogo
+
+<div align="center">
+    <img src="./assets/home.png" width="45%">
+    <img src="./assets/product.png" width="45%">
+</div>
+
+### Carrinho
+
+<img align="center" src="./assets/cart.png">
+
+### Login
+
+<img align="center" src="./assets/login.png">
+
+### Cadastro
+
+<img align="center" src="./assets/register.png">
+
+### Perfil
+
+<img align="center" src="./assets/user_profile.png">
+
+### Pedido
+
+<img align="center" src="./assets/user_order.png">
+
+### Painéis de Admin
+
+#### Produtos
+<div align="center">
+    <img src="./assets/adm_products.png" width="45%">
+    <img src="./assets/adm_create_product.png" width="45%">
+</div>
+#### Categorias
+
+<img align="center" src="./assets/adm_categories.png">
+
+#### Pedidos
+
+<div align="center">
+    <img src="./assets/adm_orders.png" width="45%">
+    <img src="./assets/adm_edit_order.png" width="45%">
+</div>
+
+### Mobile
+
+<div align="center">
+    <img src="./assets/login_mobile.png" width="45%">
+    <img src="./assets/login_mobile_tab.png" width="45%">
+</div>
