@@ -2,15 +2,16 @@
 
 <img align="center" src="./assets/LOGO BANNER.png">
 
-<p align="center">
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE) 
 ![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white) 
 ![Vue.js](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
-</p>
 
 API REST em Laravel de uma loja virtual de controles e acessórios para jogos. Cobre a jornada completa de compra: catálogo público, carrinho de visitante, fusão do carrinho no login, checkout com baixa de estoque, pagamento simulado, acompanhamento de pedidos e uma área administrativa.
 
+> [!Nota]
 > Projeto final do curso. O pagamento é **simulado**: nenhum dado de cartão é solicitado, trafegado ou armazenado.
+> [!Caution]
+> Um pouco de IA generativa foi utilizada para cumprir o prazo. Para saber mais detalhes de como foi usada durante o desenvolvimento, confira meu blog.
 
 ## Tecnologias
 
