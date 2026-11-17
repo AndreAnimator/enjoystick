@@ -2,11 +2,11 @@
 
 <img align="center" src="./assets/LOGO BANNER.png">
 
-<div align="center">
+<p align="center">
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE) 
 ![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white) 
 ![Vue.js](https://img.shields.io/badge/vue.js-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
-</div>
+</p>
 
 API REST em Laravel de uma loja virtual de controles e acessórios para jogos. Cobre a jornada completa de compra: catálogo público, carrinho de visitante, fusão do carrinho no login, checkout com baixa de estoque, pagamento simulado, acompanhamento de pedidos e uma área administrativa.
 
