@@ -8,9 +8,10 @@
 
 API REST em Laravel de uma loja virtual de controles e acessórios para jogos. Cobre a jornada completa de compra: catálogo público, carrinho de visitante, fusão do carrinho no login, checkout com baixa de estoque, pagamento simulado, acompanhamento de pedidos e uma área administrativa.
 
-> [!Nota]
+> [!NOTE]
 > Projeto final do curso. O pagamento é **simulado**: nenhum dado de cartão é solicitado, trafegado ou armazenado.
-> [!Caution]
+
+> [!IMPORTANT]  
 > Um pouco de IA generativa foi utilizada para cumprir o prazo. Para saber mais detalhes de como foi usada durante o desenvolvimento, confira meu blog.
 
 ## Tecnologias
